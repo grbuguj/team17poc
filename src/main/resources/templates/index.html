@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POC - 바코드와 날짜 인식</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+    <!-- 왼쪽 박스: 바코드 찍기 -->
+    <div class="box" id="barcode-box">
+        <h2>바코드 찍기</h2>
+        <form id="barcode-form" action="/api/scanBarcode" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" />
+            <button type="submit">바코드 스캔 시작</button>
+        </form>
+
+
+        <div id="barcode-result">
+            <p>스캔한 바코드 결과가 여기에 표시됩니다.</p>
+        </div>
+    </div>
+
+    <!-- 오른쪽 박스: 날짜 인식 -->
+    <div class="box" id="date-box">
+        <h2>날짜 인식</h2>
+        <button onclick="startDateScanner()">날짜 인식 시작</button>
+        <div id="date-result">
+            <p>날짜 인식 결과가 여기에 표시됩니다.</p>
+        </div>
+    </div>
+</div>
+
+<script src="../static/js/barcode.js"></script>
+<script src="../static/js/date.js"></script>
+</body>
+</html>
