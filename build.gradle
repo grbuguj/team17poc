@@ -32,7 +32,7 @@ dependencies {
     implementation 'com.google.zxing:javase:3.3.0'
 
     // Tess4J (Tesseract OCR)
-    implementation 'net.sourceforge.tess4j:tess4j:4.5.1'
+    implementation 'net.sourceforge.tess4j:tess4j:5.4.0'
 
     // Lombok (선택 사항)
     compileOnly 'org.projectlombok:lombok'
