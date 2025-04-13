@@ -21,3 +21,24 @@ function startBarcodeScanner() {
             });
     };
 } */
+
+const form = document.getElementById('barcode-form');
+const result = document.getElementById('barcode-result');
+
+form.addEventListener('submit', async function (e) {
+    e.preventDefault(); // 페이지 새로고침 막기
+
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch('/api/scanBarcode', {
+            method: 'POST',
+            body: formData
+        });
+
+        const text = await response.text();
+        result.innerHTML = `<p>${text}</p>`;
+    } catch (err) {
+        result.innerHTML = `<p style="color:red">에러 발생: ${err.message}</p>`;
+    }
+});
