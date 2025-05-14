@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POC - 바코드와 날짜 인식</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="container">
+    <!-- 왼쪽 박스: 바코드 찍기 -->
+    <div class="box" id="barcode-box">
+        <h2>바코드 찍기</h2>
+        <form action="/scanBarcode" method="post" enctype="multipart/form-data">
+            <label for="file">바코드 이미지 업로드:</label>
+            <input type="file" name="file" id="file" required>
+            <button type="submit">스캔</button>
+        </form>
+    </div>
+
+
+    <!-- 오른쪽 박스: 날짜 인식 -->
+    <div class="box" id="date-box">
+        <h2>날짜 인식</h2>
+        <!-- # action -> ocr/upload로 수정. ... 잠시 주석처리
+        <form id="date-form" action="/ocr/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*" />
+            <button type="submit">날짜 스캔 시작</button>
+        </form>
+        -->
+        <form id="date-form" action="/ocr/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required />
+            <button type="submit">날짜 스캔 시작</button>
+        </form>
+
+        <div id="date-result">
+            <p>스캔한 날짜 결과가 여기에 표시됩니다.</p>
+        </div>
+    </div>
+
+</div>
+
+<script src="../static/js/barcode.js"></script>
+<script src="/static/css/date.js"></script>  <!-- 경로 수정 -->
+<!-- 테스트 위한 추가
+<script>
+    const form = document.getElementById('date-form');
+    const resultBox = document.getElementById('date-result');
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault(); // ← 기본 동작(페이지 새로고침) 막기
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('/ocr/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const text = await response.text();
+
+            // 여기서 날짜만 추출하고 싶다면 정규표현식 적용도 가능
+            resultBox.innerHTML = `<p>${text}</p>`;
+
+        } catch (err) {
+            resultBox.innerHTML = `<p style="color:red">에러 발생: ${err.message}</p>`;
+        }
+    });
+</script>
+-->
+
+</body>
+</html>

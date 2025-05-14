@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>바코드 결과</title>
+</head>
+<body>
+<h1>바코드 결과</h1>
+
+<div th:if="${info != null}">
+  <p>상품명: <strong th:text="${info.name}"></strong></p>
+  <img th:src="${info.image}" alt="상품 이미지" width="300"/>
+</div>
+
+<div th:if="${error != null}">
+  <p style="color: red;" th:text="${error}"></p>
+</div>
+
+<hr/>
+<a href="/">← 다시 바코드 업로드하기</a>
+</body>
+</html>
