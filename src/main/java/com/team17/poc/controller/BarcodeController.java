@@ -6,12 +6,11 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
+import com.team17.poc.dto.BarcodeInfo;
+import com.team17.poc.repository.BarcodeRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -20,42 +19,38 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-
-@RestController
-
-@RequestMapping("/api")
+@Controller  // ← RestController → Controller로 변경
+@RequestMapping
 public class BarcodeController {
+
+    private final BarcodeRepository barcodeRepository = new BarcodeRepository();
+
     @PostMapping("/scanBarcode")
-    public String scanBarcode(@RequestParam("file") MultipartFile file) {
+    public String scanBarcode(@RequestParam("file") MultipartFile file, org.springframework.ui.Model model) {
         try {
-            // 이미지 파일을 BufferedImage로 변환
             BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-            
-            //Zxing 사용해 바코드 인코딩
             BufferedImageLuminanceSource source = new BufferedImageLuminanceSource(bufferedImage);
             BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-            
-            // 디코딩 설정
-            Map<DecodeHintType, Object> hintMap = new HashMap<>();
-            hintMap.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
-            
-            // 바코드 디코더
+
+            Map<DecodeHintType, Object> hints = new HashMap<>();
+            hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+
             MultiFormatReader reader = new MultiFormatReader();
-            String barcode = reader.decode(bitmap, hintMap).getText();
+            String barcode = reader.decode(bitmap, hints).getText();
 
-            // Open food facts api url
-            String url =  "https://world.openfoodfacts.org/api/v0/product/" + barcode + ".json";
+            BarcodeInfo info = barcodeRepository.findByBarcode(barcode);
 
-            // api 호출
-            ResponseEntity<String> response = new RestTemplate().getForEntity(url, String.class);
-            return response.getBody();
+            if (info == null) {
+                model.addAttribute("error", "해당 바코드 정보를 찾을 수 없습니다.");
+            } else {
+                model.addAttribute("info", info);
+            }
+
+            return "barcodeImage";
 
         } catch (IOException | NotFoundException e) {
-            e.printStackTrace();
-            return "바코드 스캔 실패: " + e.getMessage();
+            model.addAttribute("error", "바코드 스캔 실패: " + e.getMessage());
+            return "barcodeImage";
         }
     }
 }
-
-
-

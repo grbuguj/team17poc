@@ -11,15 +11,11 @@
     <!-- 왼쪽 박스: 바코드 찍기 -->
     <div class="box" id="barcode-box">
         <h2>바코드 찍기</h2>
-        <form id="barcode-form" action="/api/scanBarcode" method="POST" enctype="multipart/form-data">
-            <input type="file" name="file" accept="image/*" />
-            <button type="submit">바코드 스캔 시작</button>
+        <form action="/scanBarcode" method="post" enctype="multipart/form-data">
+            <label for="file">바코드 이미지 업로드:</label>
+            <input type="file" name="file" id="file" required>
+            <button type="submit">스캔</button>
         </form>
-
-
-        <div id="barcode-result">
-            <p>스캔한 바코드 결과가 여기에 표시됩니다.</p>
-        </div>
     </div>
 
 

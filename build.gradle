@@ -38,8 +38,6 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // Spring Boot DevTools (개발 중 편리한 기능)
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     // 테스트 관련 의존성
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -50,6 +48,9 @@ dependencies {
     // RestTemplate
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // DB관련
+    implementation 'org.xerial:sqlite-jdbc:3.41.2.1'
 }
 
 tasks.named('test') {
