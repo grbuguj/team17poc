@@ -1,13 +1,19 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>구글 로그인 테스트</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>키피바라</title>
+  <link rel="stylesheet" href="/css/login.css" />
 </head>
 <body>
-<h2>Google OAuth2 로그인 테스트</h2>
-<a href="/oauth2/authorization/google">
-  <button>Google 계정으로 로그인</button>
-</a>
+<div class="container">
+  <img src="/images/logo.png" alt="키피바라 로고" class="logo" />
+
+  <div class="button-group">
+    <a href="/signup" class="btn btn-primary">회원가입</a>
+    <a href="/login" class="btn btn-secondary">로그인</a>
+  </div>
+</div>
 </body>
 </html>
