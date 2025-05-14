@@ -28,8 +28,8 @@
             <button type="submit">날짜 스캔 시작</button>
         </form>
         -->
-        <form id="date-form" enctype="multipart/form-data">
-            <input type="file" name="file" accept="image/*" required />
+        <form id="date-form" action="/ocr/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required />
             <button type="submit">날짜 스캔 시작</button>
         </form>
 
