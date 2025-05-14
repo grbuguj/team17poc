@@ -51,6 +51,19 @@ dependencies {
 
     // DB관련
     implementation 'org.xerial:sqlite-jdbc:3.41.2.1'
+
+    // 구글계정 로그인 관련
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Spring Security 추가
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // OAuth2 Client 추가
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // 테스트 의존성 (선택)
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 tasks.named('test') {

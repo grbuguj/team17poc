@@ -27,5 +27,10 @@ public class HomeController {
     public String showHomepage() {
         return "index";
     }
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login"; // login.html 렌더링
+    }
 }
 
