@@ -24,57 +24,61 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(request);
-
-        String registrationId = request.getClientRegistration().getRegistrationId(); // "google" or "kakao"
-        String userNameAttributeName = request.getClientRegistration()
-                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName(); // ex: "sub", "id"
-
         Map<String, Object> attributes = oAuth2User.getAttributes();
-        Map<String, Object> extractedAttributes = new HashMap<>();
+
+        String registrationId = request.getClientRegistration().getRegistrationId(); // kakao or google
         String providerId;
+        String email;
         String name;
-        String email = null;
 
         if ("kakao".equals(registrationId)) {
-            // kakao: nested structure
-            providerId = String.valueOf(attributes.get("id"));
             Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
             Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
 
+            providerId = attributes.get("id").toString();
             name = (String) profile.get("nickname");
-            if (kakaoAccount.containsKey("email")) {
-                email = (String) kakaoAccount.get("email");
+            email = (String) kakaoAccount.get("email");
+
+            if (email == null) {
+                // 임시 이메일 생성
+                email = "kakao_" + providerId + "@no-email.com";
             }
-        } else {
-            // google or other
+
+        } else if ("google".equals(registrationId)) {
             providerId = (String) attributes.get("sub");
-            name = (String) attributes.get("name");
             email = (String) attributes.get("email");
+            name = (String) attributes.get("name");
+        } else {
+            throw new OAuth2AuthenticationException("지원하지 않는 OAuth2 제공자입니다: " + registrationId);
         }
 
-        if (name == null) {
-            throw new IllegalArgumentException("Attribute value for 'name' cannot be null");
-        }
+        // DB 조회 또는 신규 저장
+        final String fRegistrationId = registrationId;
+        final String fProviderId = providerId;
+        final String fEmail = email;
+        final String fName = name;
 
-        // 회원 정보 저장 or 조회
-        Member member = memberRepository.findByProviderAndProviderId(registrationId, providerId)
+        Member member = memberRepository.findByProviderAndProviderId(fRegistrationId, fProviderId)
                 .orElseGet(() -> {
                     Member newMember = new Member();
-                    newMember.setEmail(email);
-                    newMember.setName(name);
-                    newMember.setProvider(registrationId);
-                    newMember.setProviderId(providerId);
+                    newMember.setProvider(fRegistrationId);
+                    newMember.setProviderId(fProviderId);
+                    newMember.setEmail(fEmail);
+                    newMember.setName(fName);
                     return memberRepository.save(newMember);
                 });
 
-        extractedAttributes.put("name", name);
-        extractedAttributes.put("providerId", providerId);
-        extractedAttributes.put("provider", registrationId);
+        // 커스텀 attributes 구성 (name이라는 key가 null이면 안 되므로 nickname으로 대체)
+        Map<String, Object> customAttributes = new HashMap<>();
+        customAttributes.put("id", fProviderId);
+        customAttributes.put("email", fEmail);
+        customAttributes.put("nickname", fName);
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
-                extractedAttributes,
-                "name" // 사용자의 이름 속성을 식별자로 지정
+                customAttributes,
+                "nickname"
         );
+
     }
 }

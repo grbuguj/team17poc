@@ -64,3 +64,9 @@ body {
 .btn-google:hover {
     background-color: #f5f5f5;
 }
+
+.btn-kakao img {
+    width: 100%;
+    display: block;
+    cursor: pointer;
+}
