@@ -47,7 +47,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
             name = (String) profile.get("nickname");
             customAttributes.put("name", name);
-            customAttributes.put("email", kakaoAccount.get("email"));
+            // 이메일은 아직 권한이 없어서, 잠시 비활성화.
+            // customAttributes.put("email", kakaoAccount.get("email"));
         } else {
             // 구글 로그인일 경우 (또는 기본)
             name = (String) attributes.get("name");
