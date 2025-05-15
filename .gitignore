@@ -37,4 +37,7 @@ out/
 .vscode/
 
 
-src/main/resources/application.properties
+# 민감 정보 업로드 하지 않음. #
+.env
+.env.*
+*.secret
