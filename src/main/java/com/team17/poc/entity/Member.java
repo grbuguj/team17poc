@@ -25,5 +25,6 @@ public class Member {
     private String provider;    // 'local' or 'google'
     private String providerId;  // 구글 sub 값
 
+
     // 필요시 생성자/Getter/Setter 추가 (또는 @Data, @Builder 등 Lombok 활용)
 }
