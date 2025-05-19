@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @RequiredArgsConstructor
@@ -19,19 +21,25 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/login").permitAll()
+                        .requestMatchers("/", "/api/auth/**", "/oauth2/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/login", "/authlogin", "/signup").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login") // 👈 커스텀 로그인 페이지 경로
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService))
+                // ✅ 세션 로그인: 로그인 form을 따로 사용하지 않기 때문에 비활성화 (API 기반)
+                .formLogin(form -> form.disable())
+                // ✅ 소셜 로그인: CustomOAuth2UserService 사용
+                .oauth2Login(oauth -> oauth
+                        .loginPage("/login")
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .defaultSuccessUrl("/", true)
                 )
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/"));
+                .logout(logout -> logout.logoutSuccessUrl("/"));
 
         return http.build();
     }
 
+    // ✅ 비밀번호 암호화용 Bean 등록 (회원가입/로그인용)
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

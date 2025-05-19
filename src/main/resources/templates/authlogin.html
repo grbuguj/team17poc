@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>로그인 - 키피바라</title>
+    <link rel="stylesheet" href="/css/login.css" />
+</head>
+<body>
+<div class="container">
+    <img src="/images/logo.png" alt="키피바라 로고" class="logo" />
+
+    <form id="loginForm" class="button-group">
+        <input type="email" id="loginEmail" placeholder="이메일" required />
+        <input type="password" id="loginPassword" placeholder="비밀번호" required />
+        <button type="submit" class="btn btn-secondary full-width">로그인</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const res = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email: document.getElementById("loginEmail").value,
+                password: document.getElementById("loginPassword").value
+            })
+        });
+
+        const msg = await res.text();
+        alert(msg);
+        if (res.ok) location.href = "/";
+    });
+</script>
+</body>
+</html>
