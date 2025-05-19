@@ -27,7 +27,15 @@
             <button type="submit">날짜 스캔 시작</button>
         </form>
         <div>
+            <!-- 잠시 주석처리
             <p th:text="${ocrResult}">스캔한 날짜 결과가 여기에 표시됩니다.</p>
+            -->
+
+            <div>
+                <p th:if="${ocrResult != null}" th:text="${ocrResult.extractedDate}">스캔 결과</p>
+                <p th:unless="${ocrResult != null}">아직 유통기한을 스캔하지 않았습니다.</p>
+            </div>
+
         </div>
     </div>
 </div>
