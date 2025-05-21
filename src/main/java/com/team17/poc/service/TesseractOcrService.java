@@ -34,6 +34,7 @@ public class TesseractOcrService implements OcrService {
             rawText = tesseract.doOCR(imageFile).replaceAll("[\\n\\r]", " ").trim();
             String extracted = extractByPattern(rawText);
             if (extracted != null) {
+                System.out.println("🟢 Tesseract Ocr 인식 성공");
                 return new OcrResultDto(extracted, true, rawText, "Tesseract");
             }
         } catch (TesseractException e) {
