@@ -7,6 +7,7 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.NotFoundException;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,10 +24,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
+    /*
     @GetMapping("/")
     public String showHomepage() {
         return "index";
     }
+
+     */
+
+    @GetMapping("/")
+    public String showHomepage(Model model) {
+        model.addAttribute("ocrResult", null); // 새로 추가함.
+        return "index";
+    }
+
 
     @GetMapping("/login")
     public String loginPage() {

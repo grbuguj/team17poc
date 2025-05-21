@@ -27,7 +27,28 @@
             <button type="submit">날짜 스캔 시작</button>
         </form>
         <div>
+            <!-- 잠시 주석처리
             <p th:text="${ocrResult}">스캔한 날짜 결과가 여기에 표시됩니다.</p>
+            -->
+
+            <!--
+            <div>
+                <p th:if="${ocrResult != null}" th:text="${ocrResult.extractedDate}">스캔 결과</p>
+                <p th:unless="${ocrResult != null}">아직 유통기한을 스캔하지 않았습니다.</p>
+            </div>
+            -->
+
+            <!-- test 용도 -->
+            <!-- [테스트용] OCR 결과 출력 -->
+            <div th:if="${ocrResult != null}" style="margin-top: 1em; padding: 1em; border: 1px solid #ccc;">
+                <h3>📄 OCR 결과</h3>
+                <p><strong>✅ 인식 성공 여부:</strong> <span th:text="${ocrResult.success}"></span></p>
+                <p><strong>📅 추출된 날짜:</strong> <span th:text="${ocrResult.extractedDate}"></span></p>
+                <p><strong>🔍 전체 인식 텍스트:</strong> <span th:text="${ocrResult.rawText}"></span></p>
+                <p><strong>⚙️ 사용된 엔진:</strong> <span th:text="${ocrResult.engine}"></span></p>
+            </div>
+
+
         </div>
     </div>
 </div>
