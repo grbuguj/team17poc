@@ -5,4 +5,6 @@ import com.team17.poc.dto.OcrResultDto;
 
 public interface OcrService {
     OcrResultDto extractText(File imageFile);
+
+    OcrResultDto extractDate(File imageFile);
 }

@@ -23,38 +23,16 @@ public class OcrController {
         this.ocrService = ocrService;
     }
 
-    /*
-    @Autowired
-    public OcrController(OcrService ocrService) {
-        this.ocrService = ocrService;
-    }
-
-    @PostMapping("/upload")
-    public ResponseEntity<OcrResultDto> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) {
-            return ResponseEntity.badRequest().body(new OcrResultDto(null, false, "파일이 비어 있음", "Tesseract"));
-        }
-
-        String originalFilename = file.getOriginalFilename() == null ? "unknown" : file.getOriginalFilename();
-        File tempFile = File.createTempFile("ocr-", originalFilename);
-        file.transferTo(tempFile);
-
-        OcrResultDto result = ocrService.extractText(tempFile);
-        tempFile.delete();
-
-        return ResponseEntity.ok(result);
-    }
-
-     */
-
     @PostMapping("/upload")
     public String uploadImage(@RequestParam("file") MultipartFile file, Model model) throws IOException {
         File tempFile = File.createTempFile("ocr-", file.getOriginalFilename());
         file.transferTo(tempFile);
-        OcrResultDto result = ocrService.extractText(tempFile);
+
+        OcrResultDto result = ocrService.extractDate(tempFile);
         tempFile.delete();
 
-        model.addAttribute("ocrResult", result.getExtractedDate());
+        model.addAttribute("ocrResult", result); // ✅ 전체 객체 넘기기
         return "index"; // index.html 렌더링
     }
+
 }

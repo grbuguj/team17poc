@@ -69,6 +69,10 @@ dependencies {
     implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.4'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
+    // 이건 왜 추가한건가요?
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+
 }
 
 tasks.named('test') {
