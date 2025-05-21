@@ -43,5 +43,15 @@ public class HomeController {
     public String loginPage() {
         return "login"; // login.html 렌더링
     }
+
+    @GetMapping("/signup")
+    public String signupPage() {
+        return "signup"; // templates/signup.html
+    }
+
+    @GetMapping("/authlogin")
+    public String authloginPage() {
+        return "authlogin"; // authlogin.html
+    }
 }
 
