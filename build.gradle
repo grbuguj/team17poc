@@ -69,8 +69,11 @@ dependencies {
     implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.4'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    // 이건 왜 추가한건가요?
+    // JSON을 직렬화/역직렬화할 때 사용하는 라이브러리
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Swagger(Swagger UI + OpenAPI Spec)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 
 
 }

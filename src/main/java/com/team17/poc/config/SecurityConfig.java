@@ -23,7 +23,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/api/auth/**", "/oauth2/**", "/css/**",
                                 "/js/**", "/images/**", "/favicon.ico", "/login",
-                                "/authlogin", "/signup"
+                                "/authlogin", "/signup", "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/api-docs/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/barcode/**", "/ocr/**"

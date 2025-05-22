@@ -4,6 +4,7 @@ import com.team17.poc.dto.LoginRequest;
 import com.team17.poc.dto.SignupRequest;
 import com.team17.poc.entity.Member;
 import com.team17.poc.repository.MemberRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ public class AuthController {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Operation(summary = "회원가입", description = "이메일, 비밀번호, 이름을 입력받아 회원가입합니다.")
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
         if (memberRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -31,12 +33,13 @@ public class AuthController {
         member.setEmail(request.getEmail());
         member.setPassword(passwordEncoder.encode(request.getPassword()));
         member.setName(request.getName());
-        member.setProvider("local");  // 세션 로그인은 provider = local
+        member.setProvider("local");
 
         memberRepository.save(member);
         return ResponseEntity.ok("회원가입 완료");
     }
 
+    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하고 세션을 생성합니다.")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
         Optional<Member> optionalMember = memberRepository.findByEmail(request.getEmail());
@@ -59,6 +62,7 @@ public class AuthController {
         return ResponseEntity.ok("로그인 성공");
     }
 
+    @Operation(summary = "로그아웃", description = "세션을 만료시켜 로그아웃합니다.")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpSession session) {
         session.invalidate();
