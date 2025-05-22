@@ -1,9 +1,9 @@
-package com.team17.poc.controller;
+package com.team17.poc.auth.controller;
 
-import com.team17.poc.dto.LoginRequest;
-import com.team17.poc.dto.SignupRequest;
-import com.team17.poc.entity.Member;
-import com.team17.poc.repository.MemberRepository;
+import com.team17.poc.auth.dto.LoginRequest;
+import com.team17.poc.auth.dto.SignupRequest;
+import com.team17.poc.auth.entity.Member;
+import com.team17.poc.auth.repository.MemberRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;

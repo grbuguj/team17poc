@@ -1,7 +1,8 @@
-package com.team17.poc.service;
+package com.team17.poc.auth.service;
 
-import com.team17.poc.entity.Member;
-import com.team17.poc.repository.MemberRepository;
+import com.team17.poc.auth.entity.Member;
+import com.team17.poc.auth.model.CustomUserPrincipal;
+import com.team17.poc.auth.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -74,11 +75,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         customAttributes.put("email", fEmail);
         customAttributes.put("nickname", fName);
 
+        /*
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
                 customAttributes,
                 "nickname"
         );
+         */
+
+        return new CustomUserPrincipal(member, customAttributes);
 
     }
 }
