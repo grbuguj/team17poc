@@ -21,7 +21,13 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/api/auth/**", "/oauth2/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/login", "/authlogin", "/signup").permitAll()
+                        .requestMatchers("/", "/api/auth/**", "/oauth2/**", "/css/**",
+                                "/js/**", "/images/**", "/favicon.ico", "/login",
+                                "/authlogin", "/signup"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/barcode/**", "/ocr/**"
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 // ✅ 세션 로그인: 로그인 form을 따로 사용하지 않기 때문에 비활성화 (API 기반)
