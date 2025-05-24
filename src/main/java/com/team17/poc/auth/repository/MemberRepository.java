@@ -1,6 +1,6 @@
-package com.team17.poc.repository;
+package com.team17.poc.auth.repository;
 
-import com.team17.poc.entity.Member;
+import com.team17.poc.auth.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

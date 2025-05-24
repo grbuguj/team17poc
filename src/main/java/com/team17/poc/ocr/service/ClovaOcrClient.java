@@ -1,4 +1,4 @@
-package com.team17.poc.service;
+package com.team17.poc.ocr.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

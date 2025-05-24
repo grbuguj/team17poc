@@ -1,7 +1,7 @@
-package com.team17.poc.service;
+package com.team17.poc.ocr.service;
 
 import java.io.File;
-import com.team17.poc.dto.OcrResultDto;
+import com.team17.poc.ocr.dto.OcrResultDto;
 
 public interface OcrService {
     OcrResultDto extractText(File imageFile);

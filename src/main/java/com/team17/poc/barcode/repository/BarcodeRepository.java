@@ -1,6 +1,6 @@
-package com.team17.poc.repository;
+package com.team17.poc.barcode.repository;
 
-import com.team17.poc.dto.BarcodeInfo;
+import com.team17.poc.barcode.dto.BarcodeInfo;
 
 import java.sql.*;
 

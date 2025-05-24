@@ -1,4 +1,4 @@
-package com.team17.poc.dto;
+package com.team17.poc.barcode.dto;
 
 public class BarcodeInfo {
     private String name;

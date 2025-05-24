@@ -1,4 +1,4 @@
-package com.team17.poc.dto;
+package com.team17.poc.ocr.dto;
 
 public class OcrResultDto {
     private String extractedDate;
