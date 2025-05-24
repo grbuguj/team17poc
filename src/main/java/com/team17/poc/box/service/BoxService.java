@@ -1,10 +1,15 @@
 package com.team17.poc.box.service;
 
+import com.team17.poc.auth.entity.Member;
+import com.team17.poc.box.dto.ItemRequestDto;
 import com.team17.poc.box.dto.LocationRequestDto;
+import com.team17.poc.box.entity.Item;
 import com.team17.poc.box.entity.Location;
+import com.team17.poc.box.repository.ItemRepository;
 import com.team17.poc.box.repository.LocationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,6 +18,8 @@ import java.util.List;
 public class BoxService {
 
     private final LocationRepository locationRepository;
+
+    private final ItemRepository itemRepository; // 제품 추가 하면서 추가함.
 
     // 장소 전체 조회
     public List<Location> getLocations(Long memberId) {
@@ -39,5 +46,25 @@ public class BoxService {
     // 장소 삭제
     public void deleteLocation(Long locationId) {
         locationRepository.deleteById(locationId);
+    }
+
+
+    // 2. 제품 추가 기능 구현 (창고)
+    @Transactional
+    public void addItem(Member member, ItemRequestDto dto) {
+        Location location = locationRepository.findById(dto.getLocationId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 장소가 없습니다."));
+
+        Item item = Item.builder()
+                .name(dto.getName())
+                .imageUrl(dto.getImageUrl())
+                .registerDate(dto.getRegisterDate())
+                .expireDate(dto.getExpireDate())
+                .alarmEnabled(dto.isAlarmEnabled())
+                .location(location)
+                .member(member)
+                .build();
+
+        itemRepository.save(item);
     }
 }
