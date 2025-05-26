@@ -9,6 +9,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -20,19 +23,23 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(List.of("http://localhost:3000"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    config.setAllowedHeaders(List.of("*"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/api/auth/**", "/oauth2/**", "/css/**",
                                 "/js/**", "/images/**", "/favicon.ico", "/login",
                                 "/authlogin", "/signup"
                         ).permitAll()
-                        .requestMatchers(
-                                "/barcode/**", "/ocr/**"
-                        ).authenticated()
+                        .requestMatchers("/barcode/**", "/ocr/**").authenticated()
                         .anyRequest().authenticated()
                 )
-                // ✅ 세션 로그인: 로그인 form을 따로 사용하지 않기 때문에 비활성화 (API 기반)
-                .formLogin(form -> form.disable())
-                // ✅ 소셜 로그인: CustomOAuth2UserService 사용
+                .formLogin(AbstractHttpConfigurer::disable)
                 .oauth2Login(oauth -> oauth
                         .loginPage("/login")
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
@@ -43,7 +50,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ 비밀번호 암호화용 Bean 등록 (회원가입/로그인용)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
