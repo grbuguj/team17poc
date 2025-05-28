@@ -7,6 +7,7 @@ import com.team17.poc.box.dto.ItemRequestDto;
 import com.team17.poc.box.dto.LocationRequestDto;
 import com.team17.poc.box.dto.TempScanResult;
 import com.team17.poc.box.entity.Location;
+import com.team17.poc.box.repository.ItemRepository;
 import com.team17.poc.box.service.BarcodeDecoderService;
 import com.team17.poc.box.service.BarcodeFindService;
 import com.team17.poc.box.service.BoxService;
@@ -58,9 +59,12 @@ public class BoxController {
         return boxService.updateLocation(locationId, dto);
     }
 
+
+    private final ItemRepository itemRepository;
     // 장소 삭제
     @DeleteMapping("/locations/{locationId}")
-    public void deleteLocation(@PathVariable Long locationId) {
+    public void deleteLocation(@PathVariable("locationId") Long locationId) {
+        itemRepository.deleteByLocationId(locationId);
         boxService.deleteLocation(locationId);
     }
 

@@ -29,7 +29,8 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/api/box/items/shot-barcode",
                                 "/api/box/items/shot-expire",
-                                "api/box/items/session-id",
+                                "/api/box/items/session-id",
+                                "/api/box/locations/**",
                                 "/api/box/**"
                         ).permitAll()
                         .requestMatchers(

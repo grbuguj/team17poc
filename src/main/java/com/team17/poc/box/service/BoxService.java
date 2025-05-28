@@ -51,6 +51,7 @@ public class BoxService {
 
     // 장소 삭제
     public void deleteLocation(Long locationId) {
+        itemRepository.deleteByLocationId(locationId); // 먼저 관련 아이템 삭제 (새로 추가)
         locationRepository.deleteById(locationId);
     }
 
