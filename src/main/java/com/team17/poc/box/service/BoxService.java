@@ -3,6 +3,7 @@ package com.team17.poc.box.service;
 import com.team17.poc.auth.entity.Member;
 import com.team17.poc.box.dto.ItemRequestDto;
 import com.team17.poc.box.dto.LocationRequestDto;
+import com.team17.poc.box.dto.TempScanResult;
 import com.team17.poc.box.entity.Item;
 import com.team17.poc.box.entity.Location;
 import com.team17.poc.box.repository.ItemRepository;
@@ -11,7 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -67,4 +72,37 @@ public class BoxService {
 
         itemRepository.save(item);
     }
+
+
+    // 유통기한 추가하며 새롭게 추가된 부분.
+    private final Map<String, TempScanResult> tempScanStorage = new ConcurrentHashMap<>();
+    // 임시 저장된 바코드 값을 담은 것. (새로 추가함)
+
+    public void storeTempScan(String sessionId, TempScanResult result) {
+        tempScanStorage.put(sessionId, result);
+
+        // 바코드 -> 세션 id 역추적용 맵핑 추가함.
+        barcodeToSessionIdMap.put(result.getBarcodeId(), sessionId);
+    }
+
+    public TempScanResult getTempScan(String sessionId) {
+        TempScanResult result = tempScanStorage.get(sessionId);
+        if (result == null) {
+            throw new IllegalArgumentException("유효하지 않은 세션 ID입니다.");
+        }
+        return result;
+    }
+
+
+    // 세션 id 관련 새롭게 추가.
+
+    private final Map<String, String> barcodeToSessionIdMap = new HashMap<>();
+
+
+    public Optional<String> findSessionIdByBarcode(String barcode) {
+        // barcode → sessionId 맵핑 저장돼 있다고 가정
+        return Optional.ofNullable(barcodeToSessionIdMap.get(barcode));
+    }
+
+
 }

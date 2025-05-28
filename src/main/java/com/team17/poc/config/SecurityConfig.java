@@ -27,7 +27,10 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api-docs/**",
-                                "/api/box/items/shot-barcode"
+                                "/api/box/items/shot-barcode",
+                                "/api/box/items/shot-expire",
+                                "api/box/items/session-id",
+                                "/api/box/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/barcode/**", "/ocr/**"
