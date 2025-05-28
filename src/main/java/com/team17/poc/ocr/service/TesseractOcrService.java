@@ -1,6 +1,6 @@
-package com.team17.poc.service;
+package com.team17.poc.ocr.service;
 
-import com.team17.poc.dto.OcrResultDto;
+import com.team17.poc.ocr.dto.OcrResultDto;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;

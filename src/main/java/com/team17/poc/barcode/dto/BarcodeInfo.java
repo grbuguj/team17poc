@@ -1,4 +1,4 @@
-package com.team17.poc.dto;
+package com.team17.poc.barcode.dto;
 
 public class BarcodeInfo {
     private String name;
@@ -15,5 +15,13 @@ public class BarcodeInfo {
 
     public String getImage() {
         return image;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

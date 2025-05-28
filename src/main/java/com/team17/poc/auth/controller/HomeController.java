@@ -1,22 +1,6 @@
-package com.team17.poc.controller;
+package com.team17.poc.auth.controller;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.MultiFormatReader;
-import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
-import com.google.zxing.NotFoundException;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.imageio.ImageIO;
-import javax.swing.text.StyledEditorKit;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

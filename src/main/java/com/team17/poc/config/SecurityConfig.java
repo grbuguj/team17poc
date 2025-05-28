@@ -1,6 +1,6 @@
 package com.team17.poc.config;
 
-import com.team17.poc.service.CustomOAuth2UserService;
+import com.team17.poc.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,8 @@ public class SecurityConfig {
                                 "/authlogin", "/signup", "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api-docs/**"
+                                "/api-docs/**",
+                                "/api/box/items/shot-barcode"
                         ).permitAll()
                         .requestMatchers(
                                 "/barcode/**", "/ocr/**"
@@ -34,7 +35,19 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 // ✅ 세션 로그인: 로그인 form을 따로 사용하지 않기 때문에 비활성화 (API 기반)
-                .formLogin(form -> form.disable())
+                //.formLogin(form -> form.disable())
+
+                // 세션 로그인 (일단 다시 가능하게 하는 부분)
+                .formLogin(form -> form
+                        .loginPage("/login") // 사용자 정의 로그인 페이지
+                        .loginProcessingUrl("/login") // 로그인 POST 요청 처리
+                        .defaultSuccessUrl("/", true) // 로그인 성공 시 이동
+                        .permitAll()
+                )
+
+
+
+
                 // ✅ 소셜 로그인: CustomOAuth2UserService 사용
                 .oauth2Login(oauth -> oauth
                         .loginPage("/login")

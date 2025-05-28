@@ -1,4 +1,4 @@
-package com.team17.poc.entity;
+package com.team17.poc.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

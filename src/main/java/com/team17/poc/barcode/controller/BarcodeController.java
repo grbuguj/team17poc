@@ -1,4 +1,4 @@
-package com.team17.poc.controller;
+package com.team17.poc.barcode.controller;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -6,9 +6,8 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
-import com.team17.poc.dto.BarcodeInfo;
-import com.team17.poc.repository.BarcodeRepository;
-import org.springframework.http.ResponseEntity;
+import com.team17.poc.barcode.dto.BarcodeInfo;
+import com.team17.poc.barcode.repository.BarcodeRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
