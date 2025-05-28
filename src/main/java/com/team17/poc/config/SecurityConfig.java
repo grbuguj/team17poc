@@ -26,7 +26,8 @@ public class SecurityConfig {
                                 "/authlogin", "/signup", "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api-docs/**"
+                                "/api-docs/**",
+                                "/api/box/items/shot-barcode"
                         ).permitAll()
                         .requestMatchers(
                                 "/barcode/**", "/ocr/**"
