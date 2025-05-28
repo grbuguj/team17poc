@@ -38,17 +38,18 @@ public class BoxController {
     private final OcrService ocrService; // 🔸 OCR 서비스 주입
 
 
-    // 장소 목록 조회
+    // 장소 목록 조회 (ex. memberId가 3인 사용자의 모든 장소 조회)
     @GetMapping("/locations")
-    public List<Location> getLocations(@RequestParam("locationId") Long locationId) {
-        return boxService.getLocations(locationId);
+    public List<Location> getLocations(@RequestParam("memberId") Long memberId) {
+        return boxService.getLocations(memberId);
     }
+
 
     // 장소 등록
     @PostMapping("/locations")
-    public Location addLocation(@RequestParam("locationId") Long locationId, @RequestBody LocationRequestDto dto) {
+    public Location addLocation(@RequestParam("memberId") Long memberId, @RequestBody LocationRequestDto dto) {
         System.out.println("🔥 addLocation 컨트롤러 진입"); // for error test
-        return boxService.addLocation(locationId, dto);
+        return boxService.addLocation(memberId, dto);
     }
 
     // 장소 수정
@@ -66,9 +67,9 @@ public class BoxController {
 
     // 2. 제품 추가
     @PostMapping("/items")
-    public void addItem(@AuthenticationPrincipal Member member,
+    public void addItem(@RequestParam("memberId") Long memberId,
                         @RequestBody ItemRequestDto dto) {
-        boxService.addItem(member, dto);
+        boxService.addItem(memberId, dto);
     }
 
 

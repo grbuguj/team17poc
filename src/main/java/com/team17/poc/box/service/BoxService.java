@@ -1,6 +1,7 @@
 package com.team17.poc.box.service;
 
 import com.team17.poc.auth.entity.Member;
+import com.team17.poc.auth.repository.MemberRepository;
 import com.team17.poc.box.dto.ItemRequestDto;
 import com.team17.poc.box.dto.LocationRequestDto;
 import com.team17.poc.box.dto.TempScanResult;
@@ -55,6 +56,7 @@ public class BoxService {
 
 
     // 2. 제품 추가 기능 구현 (창고)
+    /* api 테스트 때문에 잠시 주석처리.
     @Transactional
     public void addItem(Member member, ItemRequestDto dto) {
         Location location = locationRepository.findById(dto.getLocationId())
@@ -72,6 +74,31 @@ public class BoxService {
 
         itemRepository.save(item);
     }
+     */
+
+    private final MemberRepository memberRepository;
+
+    @Transactional
+    public void addItem(Long memberId, ItemRequestDto dto) {
+        Location location = locationRepository.findById(dto.getLocationId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 장소가 없습니다."));
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다."));
+
+        Item item = Item.builder()
+                .name(dto.getName())
+                .imageUrl(dto.getImageUrl())
+                .registerDate(dto.getRegisterDate())
+                .expireDate(dto.getExpireDate())
+                .alarmEnabled(dto.isAlarmEnabled())
+                .location(location)
+                .member(member)
+                .build();
+
+        itemRepository.save(item);
+    }
+
 
 
     // 유통기한 추가하며 새롭게 추가된 부분.
