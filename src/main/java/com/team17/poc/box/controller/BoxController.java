@@ -12,6 +12,7 @@ import com.team17.poc.box.service.BarcodeDecoderService;
 import com.team17.poc.box.service.BarcodeFindService;
 import com.team17.poc.box.service.BoxService;
 import com.team17.poc.ocr.service.OcrService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,9 +80,11 @@ public class BoxController {
 
     // 바코드 촬영
 
+    /*
     @PostMapping("/items/shot-barcode")
     public ResponseEntity<Map<String, String>> readBarcode(@RequestParam("file") MultipartFile file) {
         System.out.println("✅ 컨트롤러 진입 성공"); // for test
+
         try {
             String barcode = barcodeDecoderService.decodeBarcode(file);
             Optional<BarcodeInfo> result = barcodeFindService.findByBarcode(barcode);
@@ -93,12 +96,14 @@ public class BoxController {
 
             String sessionId = UUID.randomUUID().toString();
             boxService.storeTempScan(sessionId, new TempScanResult(
-                    /*
+                    여기 주석처리
                     barcode,
                     result.get().getName(),
                     result.get().getImage(),
                     LocalDate.now()
-                     */
+                     여기까지 주석처리
+
+
                     result.get().getImage(),       // ✅ imageUrl
                     barcode,                       // ✅ barcodeId
                     result.get().getName(),        // ✅ productName
@@ -116,6 +121,50 @@ public class BoxController {
                     .body(Map.of("error", "바코드 인식 실패. 직접 입력하세요."));
         }
     }
+     */
+
+    @PostMapping("/items/shot-barcode")
+    public ResponseEntity<Map<String, String>> readBarcode(
+            @RequestParam("file") MultipartFile file,
+            HttpSession session) {  // ✅ 세션 파라미터 추가
+
+        System.out.println("✅ 컨트롤러 진입 성공");
+
+        Long memberId = (Long) session.getAttribute("memberId");  // ✅ 세션에서 사용자 ID 꺼내기
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "로그인 세션 없음"));
+        }
+
+        try {
+            String barcode = barcodeDecoderService.decodeBarcode(file);
+            Optional<BarcodeInfo> result = barcodeFindService.findByBarcode(barcode);
+
+            if (result.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "등록되지 않은 바코드입니다."));
+            }
+
+            // ✅ 더 이상 랜덤 세션 ID 만들지 않고, 진짜 사용자 ID로 저장
+            boxService.storeTempScan(memberId, new TempScanResult(
+                    result.get().getImage(),       // imageUrl
+                    barcode,                       // barcodeId
+                    result.get().getName(),        // productName
+                    LocalDate.now()                // capturedDate
+            ));
+
+            return ResponseEntity.ok(Map.of(
+                    "productName", result.get().getName(),
+                    "imageUrl", result.get().getImage()
+                    // ❌ sessionId 제거
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "바코드 인식 실패. 직접 입력하세요."));
+        }
+    }
+
 
 
     // new..
@@ -133,7 +182,13 @@ public class BoxController {
     @PostMapping("/items/shot-expire")
     public ResponseEntity<ExpireOcrResultDto> handleExpireScan(
             @RequestParam("imageFile") MultipartFile imageFile,
-            @RequestParam("sessionId") String sessionId) throws IOException {
+            /*@RequestParam("sessionId")*/
+            HttpSession session) throws IOException {
+
+        Long memberId = (Long) session.getAttribute("memberId");  // ✅ 세션에서 꺼냄
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         // Multifile -> File로 변환 과정 (아래)
         // File file = convertToFile(imageFile);
@@ -151,7 +206,7 @@ public class BoxController {
 
 
 
-        TempScanResult result = boxService.getTempScan(sessionId);
+        TempScanResult result = boxService.getTempScan(memberId);
         String ocrText = ocrService.extractText(convFile).getRawText();
         String expireDate = ocrService.extractDate(convFile).getExtractedDate();
 
@@ -167,6 +222,7 @@ public class BoxController {
 
 
     // 세션 id 추가 (촬영 연속으로 하는데, 그 데이터들을 조합해서 해야함.)
+    /*
     @GetMapping("/items/session-id")
     public ResponseEntity<String> getSessionId(@RequestParam("barcode") String barcode) {
         Optional<String> sessionId = boxService.findSessionIdByBarcode(barcode);
@@ -175,6 +231,17 @@ public class BoxController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("세션 없음"));
     }
+     */
+
+    @GetMapping("/items/member-id")
+    public ResponseEntity<Long> getMemberIdByBarcode(@RequestParam("barcode") String barcode) {
+        Optional<Long> memberId = boxService.findMemberIdByBarcode(barcode);  // ✅ 바뀐 메서드명
+
+        return memberId
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+    }
+
 
 
 

@@ -103,18 +103,19 @@ public class BoxService {
 
 
     // 유통기한 추가하며 새롭게 추가된 부분.
-    private final Map<String, TempScanResult> tempScanStorage = new ConcurrentHashMap<>();
+    private final Map<Long, TempScanResult> tempScanStorage = new ConcurrentHashMap<>();
     // 임시 저장된 바코드 값을 담은 것. (새로 추가함)
 
-    public void storeTempScan(String sessionId, TempScanResult result) {
-        tempScanStorage.put(sessionId, result);
+    public void storeTempScan(Long memberId, TempScanResult result) {
+        tempScanStorage.put(memberId, result);
 
         // 바코드 -> 세션 id 역추적용 맵핑 추가함.
-        barcodeToSessionIdMap.put(result.getBarcodeId(), sessionId);
+        barcodeToSessionIdMap.put(result.getBarcodeId(), String.valueOf(memberId));
+        barcodeToMemberIdMap.put(result.getBarcodeId(), memberId);
     }
 
-    public TempScanResult getTempScan(String sessionId) {
-        TempScanResult result = tempScanStorage.get(sessionId);
+    public TempScanResult getTempScan(Long memberId) {
+        TempScanResult result = tempScanStorage.get(memberId);
         if (result == null) {
             throw new IllegalArgumentException("유효하지 않은 세션 ID입니다.");
         }
@@ -125,12 +126,17 @@ public class BoxService {
     // 세션 id 관련 새롭게 추가.
 
     private final Map<String, String> barcodeToSessionIdMap = new HashMap<>();
-
+    private final Map<String, Long> barcodeToMemberIdMap = new HashMap<>();
 
     public Optional<String> findSessionIdByBarcode(String barcode) {
         // barcode → sessionId 맵핑 저장돼 있다고 가정
         return Optional.ofNullable(barcodeToSessionIdMap.get(barcode));
     }
 
+
+    public Optional<Long> findMemberIdByBarcode(String barcode) {
+        // barcode → sessionId 맵핑 저장돼 있다고 가정
+        return Optional.ofNullable(barcodeToMemberIdMap.get(barcode));
+    }
 
 }
