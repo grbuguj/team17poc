@@ -2,6 +2,7 @@ package com.team17.poc.box.service;
 
 import com.team17.poc.auth.entity.Member;
 import com.team17.poc.auth.repository.MemberRepository;
+import com.team17.poc.box.dto.BoxResponseDto;
 import com.team17.poc.box.dto.ItemRequestDto;
 import com.team17.poc.box.dto.LocationRequestDto;
 import com.team17.poc.box.dto.TempScanResult;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -99,6 +101,16 @@ public class BoxService {
 
         itemRepository.save(item);
     }
+
+
+    // 제품 조회 관련 부분
+    public List<BoxResponseDto> getItemsByMemberId(Long memberId) {
+        List<Item> items = itemRepository.findByMemberId(memberId);
+        return items.stream()
+                .map(BoxResponseDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 
 
 
