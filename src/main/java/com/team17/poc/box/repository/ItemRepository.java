@@ -10,10 +10,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByMemberId(Long memberId);
     List<Item> findByLocationId(Long locationId);
+
+    // 제품 단일 조회 위한 code
+    Optional<Item> findByIdAndMember_Id(Long id, Long memberId);
+
 
     @Transactional
     @Modifying

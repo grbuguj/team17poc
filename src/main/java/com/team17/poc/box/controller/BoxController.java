@@ -88,6 +88,7 @@ public class BoxController {
         boxService.addItem(memberId, dto);
     }
 
+    // 전체 제품 조회
     @GetMapping("/items")
     @ResponseBody
     public List<BoxResponseDto> getItems(HttpSession session) {
@@ -96,6 +97,18 @@ public class BoxController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
         }
         return boxService.getItemsByMemberId(memberId);
+    }
+
+    // 상세 제품 조회
+    @GetMapping("/items/{itemId}")
+    @ResponseBody
+    public BoxResponseDto getItemById(@PathVariable("itemId") Long itemId, HttpSession session) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
+        return boxService.getItemByIdAndMember(itemId, memberId);
     }
 
 

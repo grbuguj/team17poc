@@ -111,6 +111,13 @@ public class BoxService {
                 .collect(Collectors.toList());
     }
 
+    // 상세 제품 조회 관련 부분
+    public BoxResponseDto getItemByIdAndMember(Long itemId, Long memberId) {
+        Item item = itemRepository.findByIdAndMember_Id(itemId, memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 제품이 없습니다."));
+        return BoxResponseDto.fromEntity(item);
+    }
+
 
 
 
