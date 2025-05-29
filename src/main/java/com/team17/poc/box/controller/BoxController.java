@@ -88,16 +88,19 @@ public class BoxController {
         boxService.addItem(memberId, dto);
     }
 
-    // 전체 제품 조회
+    // 전체 제품 조회 및 정렬 기능
     @GetMapping("/items")
     @ResponseBody
-    public List<BoxResponseDto> getItems(HttpSession session) {
+    public List<BoxResponseDto> getItemsSorted(@RequestParam(name = "sortBy", required = false, defaultValue = "expireDate") String sortBy,
+                                               HttpSession session) {
         Long memberId = (Long) session.getAttribute("memberId");
         if (memberId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
         }
-        return boxService.getItemsByMemberId(memberId);
+
+        return boxService.getSortedItemsByMemberId(memberId, sortBy); // ✅ 이걸로 호출해야 함
     }
+
 
     // 상세 제품 조회
     @GetMapping("/items/{itemId}")

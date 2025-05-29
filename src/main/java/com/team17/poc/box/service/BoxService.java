@@ -119,6 +119,32 @@ public class BoxService {
     }
 
 
+    // 제품 정렬 기능 (유통기한 만료 순, 최신순, 과거순)
+    public List<BoxResponseDto> getSortedItemsByMemberId(Long memberId, String sortBy) {
+        List<Item> items;
+
+        switch (sortBy) {
+            case "expireDate":
+                items = itemRepository.findByMemberIdOrderByExpireDateAsc(memberId);
+                break;
+            case "latest":
+                items = itemRepository.findByMemberIdOrderByRegisterDateDesc(memberId);
+                break;
+            case "past":
+                items = itemRepository.findByMemberIdOrderByRegisterDateAsc(memberId);
+                break;
+            default:
+                items = itemRepository.findByMemberIdOrderByLocationIdAsc(memberId);
+                break;
+        }
+
+        return items.stream()
+                .map(BoxResponseDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+
+
 
 
     // 유통기한 추가하며 새롭게 추가된 부분.
