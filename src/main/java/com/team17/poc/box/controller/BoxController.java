@@ -1,17 +1,14 @@
 package com.team17.poc.box.controller;
 
-import com.team17.poc.auth.entity.Member;
 import com.team17.poc.barcode.dto.BarcodeInfo;
-import com.team17.poc.box.dto.ExpireOcrResultDto;
-import com.team17.poc.box.dto.ItemRequestDto;
-import com.team17.poc.box.dto.LocationRequestDto;
-import com.team17.poc.box.dto.TempScanResult;
+import com.team17.poc.box.dto.*;
 import com.team17.poc.box.entity.Location;
 import com.team17.poc.box.repository.ItemRepository;
 import com.team17.poc.box.service.BarcodeDecoderService;
 import com.team17.poc.box.service.BarcodeFindService;
 import com.team17.poc.box.service.BoxService;
 import com.team17.poc.ocr.service.OcrService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.team17.poc.ocr.service.OcrService; // 🔸 OCR 의존성 주입을 위한 import
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.io.File;
@@ -41,21 +39,29 @@ public class BoxController {
 
     // 장소 목록 조회 (ex. memberId가 3인 사용자의 모든 장소 조회)
     @GetMapping("/locations")
-    public List<Location> getLocations(@RequestParam("memberId") Long memberId) {
+    public List<Location> getLocations(HttpSession session) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
         return boxService.getLocations(memberId);
     }
 
-
     // 장소 등록
     @PostMapping("/locations")
-    public Location addLocation(@RequestParam("memberId") Long memberId, @RequestBody LocationRequestDto dto) {
-        System.out.println("🔥 addLocation 컨트롤러 진입"); // for error test
+    public Location addLocation(HttpSession session, @RequestBody LocationRequestDto dto) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
         return boxService.addLocation(memberId, dto);
     }
 
     // 장소 수정
     @PatchMapping("/locations/{locationId}")
-    public Location updateLocation(@PathVariable Long locationId, @RequestBody LocationRequestDto dto) {
+    public Location updateLocation(@PathVariable("locationId") Long locationId, @RequestBody LocationRequestDto dto) {
         return boxService.updateLocation(locationId, dto);
     }
 
@@ -71,17 +77,61 @@ public class BoxController {
 
     // 2. 제품 추가
     @PostMapping("/items")
-    public void addItem(@RequestParam("memberId") Long memberId,
+    @ResponseBody
+    public void addItem(HttpSession session,
                         @RequestBody ItemRequestDto dto) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
         boxService.addItem(memberId, dto);
     }
 
+    // 전체 제품 조회 및 정렬 기능
+    @GetMapping("/items")
+    @ResponseBody
+    public List<BoxResponseDto> getItemsSorted(@RequestParam(name = "sortBy", required = false, defaultValue = "expireDate") String sortBy,
+                                               HttpSession session) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
+        return boxService.getSortedItemsByMemberId(memberId, sortBy); // ✅ 이걸로 호출해야 함
+    }
+
+
+    // 상세 제품 조회
+    @GetMapping("/items/{itemId}")
+    @ResponseBody
+    public BoxResponseDto getItemById(@PathVariable("itemId") Long itemId, HttpSession session) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
+        return boxService.getItemByIdAndMember(itemId, memberId);
+    }
+
+
+
+
 
     // 바코드 촬영
-
     @PostMapping("/items/shot-barcode")
-    public ResponseEntity<Map<String, String>> readBarcode(@RequestParam("file") MultipartFile file) {
-        System.out.println("✅ 컨트롤러 진입 성공"); // for test
+    public ResponseEntity<Map<String, String>> readBarcode(
+            @RequestParam("file") MultipartFile file,
+            HttpSession session) {  // ✅ 세션 파라미터 추가
+
+        System.out.println("✅ 컨트롤러 진입 성공");
+
+        Long memberId = (Long) session.getAttribute("memberId");  // ✅ 세션에서 사용자 ID 꺼내기
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "로그인 세션 없음"));
+        }
+
         try {
             String barcode = barcodeDecoderService.decodeBarcode(file);
             Optional<BarcodeInfo> result = barcodeFindService.findByBarcode(barcode);
@@ -91,24 +141,18 @@ public class BoxController {
                         .body(Map.of("error", "등록되지 않은 바코드입니다."));
             }
 
-            String sessionId = UUID.randomUUID().toString();
-            boxService.storeTempScan(sessionId, new TempScanResult(
-                    /*
-                    barcode,
-                    result.get().getName(),
-                    result.get().getImage(),
-                    LocalDate.now()
-                     */
-                    result.get().getImage(),       // ✅ imageUrl
-                    barcode,                       // ✅ barcodeId
-                    result.get().getName(),        // ✅ productName
-                    LocalDate.now()                // ✅ capturedDate
+            // ✅ 더 이상 랜덤 세션 ID 만들지 않고, 진짜 사용자 ID로 저장
+            boxService.storeTempScan(memberId, new TempScanResult(
+                    result.get().getImage(),       // imageUrl
+                    barcode,                       // barcodeId
+                    result.get().getName(),        // productName
+                    LocalDate.now()                // capturedDate
             ));
 
             return ResponseEntity.ok(Map.of(
                     "productName", result.get().getName(),
-                    "imageUrl", result.get().getImage(),
-                    "sessionId", sessionId
+                    "imageUrl", result.get().getImage()
+                    // ❌ sessionId 제거
             ));
 
         } catch (Exception e) {
@@ -116,6 +160,7 @@ public class BoxController {
                     .body(Map.of("error", "바코드 인식 실패. 직접 입력하세요."));
         }
     }
+
 
 
     // new..
@@ -129,20 +174,17 @@ public class BoxController {
         }
     }
 
-
+    // 유통기한 촬영
     @PostMapping("/items/shot-expire")
     public ResponseEntity<ExpireOcrResultDto> handleExpireScan(
             @RequestParam("imageFile") MultipartFile imageFile,
-            @RequestParam("sessionId") String sessionId) throws IOException {
+            /*@RequestParam("sessionId")*/
+            HttpSession session) throws IOException {
 
-        // Multifile -> File로 변환 과정 (아래)
-        // File file = convertToFile(imageFile);
-        /* 잠시 주석처리.
-        File convFile = new File(imageFile.getOriginalFilename());
-        imageFile.transferTo(convFile);
-        */
-
-        // ocrService.extractDate(convFile);
+        Long memberId = (Long) session.getAttribute("memberId");  // ✅ 세션에서 꺼냄
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         String ext = imageFile.getOriginalFilename().replaceAll("^.*\\.(?=\\w+$)", ".");
         File convFile = File.createTempFile("upload_", ext);
@@ -151,7 +193,7 @@ public class BoxController {
 
 
 
-        TempScanResult result = boxService.getTempScan(sessionId);
+        TempScanResult result = boxService.getTempScan(memberId);
         String ocrText = ocrService.extractText(convFile).getRawText();
         String expireDate = ocrService.extractDate(convFile).getExtractedDate();
 
@@ -166,18 +208,25 @@ public class BoxController {
     }
 
 
-    // 세션 id 추가 (촬영 연속으로 하는데, 그 데이터들을 조합해서 해야함.)
-    @GetMapping("/items/session-id")
-    public ResponseEntity<String> getSessionId(@RequestParam("barcode") String barcode) {
-        Optional<String> sessionId = boxService.findSessionIdByBarcode(barcode);
 
-        return sessionId
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("세션 없음"));
+    // 상품 수정
+    @PatchMapping("/items/{itemId}")
+    public ResponseEntity<Void> updateItem(@PathVariable("itemId") Long itemId,
+                                           @RequestBody ItemRequestDto requestDto,
+                                           HttpSession session) {
+        Long memberId = (Long) session.getAttribute("memberId");  // 세션에서 memberId 추출
+        boxService.updateItem(itemId, requestDto, memberId);
+        return ResponseEntity.ok().build();
     }
 
 
+    // 상품 삭제
 
+    @DeleteMapping("/items/{itemId}")
+    public ResponseEntity<Void> deleteItem(@PathVariable("itemId") Long itemId) {
+        boxService.deleteItem(itemId);
+        return ResponseEntity.noContent().build();
+    }
 
 
 }

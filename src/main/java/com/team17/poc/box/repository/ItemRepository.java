@@ -10,10 +10,21 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByMemberId(Long memberId);
     List<Item> findByLocationId(Long locationId);
+
+    // 제품 단일 조회 위한 code
+    Optional<Item> findByIdAndMember_Id(Long id, Long memberId);
+
+    // 정렬 관련 (유통기한 임박순, 최신 등록순, 과거 등록순)
+    List<Item> findByMemberIdOrderByExpireDateAsc(Long memberId);
+    List<Item> findByMemberIdOrderByRegisterDateDesc(Long memberId);
+    List<Item> findByMemberIdOrderByRegisterDateAsc(Long memberId);
+    List<Item> findByMemberIdOrderByLocationIdAsc(Long memberId);
+
 
     @Transactional
     @Modifying
