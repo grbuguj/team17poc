@@ -143,6 +143,31 @@ public class BoxService {
                 .collect(Collectors.toList());
     }
 
+    // 제품 수정 관련
+    @Transactional
+    public void updateItem(Long itemId, ItemRequestDto dto, Long memberId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 제품이 없습니다."));
+
+        Location location = locationRepository.findById(dto.getLocationId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 장소가 없습니다."));
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 없습니다."));
+
+        item.updateFromDto(dto, location, member);
+    }
+
+    // 제품 삭제 관련
+    @Transactional
+    public void deleteItem(Long itemId) {
+        if (!itemRepository.existsById(itemId)) {
+            throw new IllegalArgumentException("해당 제품이 없습니다.");
+        }
+        itemRepository.deleteById(itemId);
+    }
+
+
 
 
 

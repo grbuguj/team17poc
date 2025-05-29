@@ -2,6 +2,7 @@
 package com.team17.poc.box.entity;
 
 import com.team17.poc.auth.entity.Member;
+import com.team17.poc.box.dto.ItemRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -34,5 +35,17 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    // 아이템 업데이트 관련
+    public void updateFromDto(ItemRequestDto dto, Location location, Member member) {
+        this.name = dto.getName();
+        this.imageUrl = dto.getImageUrl();
+        this.registerDate = dto.getRegisterDate(); // 필드명이 shotDate여도 DTO는 registerDate
+        this.expireDate = dto.getExpireDate();
+        this.alarmEnabled = dto.isAlarmEnabled();
+        this.location = location;
+        this.member = member;
+    }
+
 }
 

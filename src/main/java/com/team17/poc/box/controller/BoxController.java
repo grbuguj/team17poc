@@ -209,5 +209,24 @@ public class BoxController {
 
 
 
+    // 상품 수정
+    @PatchMapping("/items/{itemId}")
+    public ResponseEntity<Void> updateItem(@PathVariable("itemId") Long itemId,
+                                           @RequestBody ItemRequestDto requestDto,
+                                           HttpSession session) {
+        Long memberId = (Long) session.getAttribute("memberId");  // 세션에서 memberId 추출
+        boxService.updateItem(itemId, requestDto, memberId);
+        return ResponseEntity.ok().build();
+    }
+
+
+    // 상품 삭제
+
+    @DeleteMapping("/items/{itemId}")
+    public ResponseEntity<Void> deleteItem(@PathVariable("itemId") Long itemId) {
+        boxService.deleteItem(itemId);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
