@@ -21,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.team17.poc.ocr.service.OcrService; // 🔸 OCR 의존성 주입을 위한 import
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.io.File;
@@ -42,21 +43,29 @@ public class BoxController {
 
     // 장소 목록 조회 (ex. memberId가 3인 사용자의 모든 장소 조회)
     @GetMapping("/locations")
-    public List<Location> getLocations(@RequestParam("memberId") Long memberId) {
+    public List<Location> getLocations(HttpSession session) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
         return boxService.getLocations(memberId);
     }
 
-
     // 장소 등록
     @PostMapping("/locations")
-    public Location addLocation(@RequestParam("memberId") Long memberId, @RequestBody LocationRequestDto dto) {
-        System.out.println("🔥 addLocation 컨트롤러 진입"); // for error test
+    public Location addLocation(HttpSession session, @RequestBody LocationRequestDto dto) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
         return boxService.addLocation(memberId, dto);
     }
 
     // 장소 수정
     @PatchMapping("/locations/{locationId}")
-    public Location updateLocation(@PathVariable Long locationId, @RequestBody LocationRequestDto dto) {
+    public Location updateLocation(@PathVariable("locationId") Long locationId, @RequestBody LocationRequestDto dto) {
         return boxService.updateLocation(locationId, dto);
     }
 
@@ -71,11 +80,25 @@ public class BoxController {
 
 
     // 2. 제품 추가
+    /*
     @PostMapping("/items")
     public void addItem(@RequestParam("memberId") Long memberId,
                         @RequestBody ItemRequestDto dto) {
         boxService.addItem(memberId, dto);
     }
+     */
+    @PostMapping("/items")
+    @ResponseBody
+    public void addItem(HttpSession session,
+                        @RequestBody ItemRequestDto dto) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
+        boxService.addItem(memberId, dto);
+    }
+
 
 
     // 바코드 촬영
