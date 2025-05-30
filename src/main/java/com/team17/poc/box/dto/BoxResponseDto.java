@@ -17,6 +17,7 @@ public class BoxResponseDto {
     private String expireDate;
     private String locationName;
     private Long locationId;
+    private boolean alarmEnabled;
 
 
     public static BoxResponseDto fromEntity(Item item) {
@@ -40,7 +41,8 @@ public class BoxResponseDto {
                 formattedRegisterDate,
                 formattedDate,
                 locationName,
-                item.getLocation() != null ? item.getLocation().getId() : null
+                item.getLocation() != null ? item.getLocation().getId() : null,
+                item.isAlarmEnabled()
         );
     }
 }
