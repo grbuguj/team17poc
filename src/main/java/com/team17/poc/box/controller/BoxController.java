@@ -85,6 +85,10 @@ public class BoxController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
         }
 
+        if (!memberId.equals(dto.getMemberId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "memberId 위조 시도 감지");
+        }
+
         boxService.addItem(memberId, dto);
     }
 
