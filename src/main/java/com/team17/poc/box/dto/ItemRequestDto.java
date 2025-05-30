@@ -7,12 +7,11 @@ import java.time.LocalDate;
 
 @Getter
 public class ItemRequestDto {
-
+    private Long memberId;
     private String name;
     private String imageUrl;
     private LocalDate registerDate;
     private LocalDate expireDate;
     private boolean alarmEnabled;
     private Long locationId;
-
 }

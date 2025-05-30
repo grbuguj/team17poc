@@ -84,6 +84,7 @@ public class BoxService {
     @Transactional
     public void addItem(Long memberId, ItemRequestDto dto) {
         Location location = locationRepository.findById(dto.getLocationId())
+                .filter(loc -> loc.getMemberId().equals(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("해당 장소가 없습니다."));
 
         Member member = memberRepository.findById(memberId)
