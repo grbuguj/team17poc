@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -36,7 +37,15 @@ public class AuthController {
         member.setProvider("local");
 
         memberRepository.save(member);
-        return ResponseEntity.ok("회원가입 완료");
+        // return ResponseEntity.ok("회원가입 완료");
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "message", "회원가입 완료",
+                        "name", member.getName(),
+                        "email", member.getName()
+                )
+        );
     }
 
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하고 세션을 생성합니다.")
@@ -59,7 +68,14 @@ public class AuthController {
         }
 
         session.setAttribute("memberId", member.getId());
-        return ResponseEntity.ok("로그인 성공");
+        // return ResponseEntity.ok("로그인 성공");
+        return ResponseEntity.ok(
+                Map.of(
+                        "message", "로그인 성공",
+                        "name", member.getName(),
+                        "email", member.getEmail()
+                )
+        );
     }
 
     @Operation(summary = "로그아웃", description = "세션을 만료시켜 로그아웃합니다.")
