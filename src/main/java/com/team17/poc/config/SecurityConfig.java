@@ -26,7 +26,10 @@ public class SecurityConfig {
                 // front api 테스트 시, cors 에러 발생하여 추가함.
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:3000"));
+                    config.setAllowedOrigins(List.of(
+                            "http://localhost:3000",
+                            "http://keepbara.duckdns.org:8082"
+                            ));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // PATCH 추가
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowCredentials(true);
