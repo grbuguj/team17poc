@@ -43,7 +43,7 @@ public class AuthController {
                 Map.of(
                         "message", "회원가입 완료",
                         "name", member.getName(),
-                        "email", member.getName()
+                        "email", member.getEmail()
                 )
         );
     }
