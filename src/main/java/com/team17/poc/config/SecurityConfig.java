@@ -31,7 +31,13 @@ public class SecurityConfig {
                             "http://keepbara.duckdns.org"
                             ));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // PATCH 추가
-                    config.setAllowedHeaders(List.of("*"));
+                    config.setAllowedHeaders(List.of(
+                            "Content-Type",
+                            "Authorization",
+                            "X-Requested-With",
+                            "Accept",
+                            "Origin"
+                    )); // 실무에서 많이 쓰는 인증 값.
                     config.setAllowCredentials(true);
                     return config;
                 }))
