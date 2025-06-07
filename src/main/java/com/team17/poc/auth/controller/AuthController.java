@@ -42,6 +42,7 @@ public class AuthController {
         return ResponseEntity.ok(
                 Map.of(
                         "message", "회원가입 완료",
+                        "id", member.getId(),
                         "name", member.getName(),
                         "email", member.getEmail()
                 )
@@ -72,6 +73,7 @@ public class AuthController {
         return ResponseEntity.ok(
                 Map.of(
                         "message", "로그인 성공",
+                        "id", member.getId(),
                         "name", member.getName(),
                         "email", member.getEmail()
                 )
