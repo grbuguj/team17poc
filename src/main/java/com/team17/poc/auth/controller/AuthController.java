@@ -5,13 +5,18 @@ import com.team17.poc.auth.dto.SignupRequest;
 import com.team17.poc.auth.entity.Member;
 import com.team17.poc.auth.repository.MemberRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -51,7 +56,7 @@ public class AuthController {
 
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하고 세션을 생성합니다.")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         Optional<Member> optionalMember = memberRepository.findByEmail(request.getEmail());
 
         if (optionalMember.isEmpty()) {
@@ -68,8 +73,20 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
         }
 
-        session.setAttribute("memberId", member.getId());
-        // return ResponseEntity.ok("로그인 성공");
+        // ✅ 인증 객체 생성
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(member.getEmail(), null, List.of());
+
+        // ✅ SecurityContext에 인증 정보 저장
+        SecurityContextHolder.getContext().setAuthentication(authToken);
+
+        // ✅ 세션에 SecurityContext도 저장 (Spring Security가 이걸 통해 인증 상태 유지함)
+        HttpSession session = httpRequest.getSession(true);
+        session.setAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                SecurityContextHolder.getContext()
+        );
+
         return ResponseEntity.ok(
                 Map.of(
                         "message", "로그인 성공",
@@ -79,6 +96,7 @@ public class AuthController {
                 )
         );
     }
+
 
     @Operation(summary = "로그아웃", description = "세션을 만료시켜 로그아웃합니다.")
     @PostMapping("/logout")
