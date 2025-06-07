@@ -28,7 +28,7 @@ public class SecurityConfig {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of(
                             "http://localhost:3000",
-                            "http://keepbara.duckdns.org:8082"
+                            "http://keepbara.duckdns.org"
                             ));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // PATCH 추가
                     config.setAllowedHeaders(List.of("*"));
