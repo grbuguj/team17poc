@@ -232,5 +232,53 @@ public class BoxController {
         return ResponseEntity.noContent().build();
     }
 
+    /* 알람 관련 부분 */
+
+
+    /**
+     * 알림 상품 조회 - 기준일 이내 유통기한이 도래하는 상품들
+     * /api/box/notify?standardDays=14
+     */
+
+    // 알림 상품 조회
+    @GetMapping("/notify")
+    public ResponseEntity<List<NotifyItemDto>> getNotifiedItems(
+            @RequestParam(name = "standardDays", required = false) Integer standardDays,
+            HttpSession session
+    ) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
+        List<NotifyItemDto> items = boxService.getItemsExpiringSoon(memberId, standardDays);
+        return ResponseEntity.ok(items);
+    }
+
+
+    /**
+     * 알림 기준일 설정
+     * /api/box/notify-date-change
+     */
+    @PatchMapping("/notify-date-change")
+    public ResponseEntity<NotifyStandardResponseDto> updateNotifyStandard(
+            @RequestBody NotifyStandardRequestDto requestDto,
+            HttpSession session
+    ) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인을 해주세요!");
+        }
+
+        int updatedDays = requestDto.getStandardDays();
+        boxService.setNotifyStandard(memberId, updatedDays);
+
+        NotifyStandardResponseDto response = new NotifyStandardResponseDto(
+                "기준일 변경이 완료되었습니다.",
+                updatedDays
+        );
+
+        return ResponseEntity.ok(response);
+    }
 
 }

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +31,11 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     @Modifying
     @Query("DELETE FROM Item i WHERE i.location.id = :locationId")
     void deleteByLocationId(@Param("locationId") Long locationId);
+
+    /**
+     * ✅ 특정 사용자에 대해 유통기한이 기준일 이내로 남은 상품 조회
+     */
+    List<Item> findItemsByMemberIdAndExpireDateLessThanEqual(Long memberId, LocalDate threshold);
 
 
 }

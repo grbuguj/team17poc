@@ -2,10 +2,7 @@ package com.team17.poc.box.service;
 
 import com.team17.poc.auth.entity.Member;
 import com.team17.poc.auth.repository.MemberRepository;
-import com.team17.poc.box.dto.BoxResponseDto;
-import com.team17.poc.box.dto.ItemRequestDto;
-import com.team17.poc.box.dto.LocationRequestDto;
-import com.team17.poc.box.dto.TempScanResult;
+import com.team17.poc.box.dto.*;
 import com.team17.poc.box.entity.Item;
 import com.team17.poc.box.entity.Location;
 import com.team17.poc.box.repository.ItemRepository;
@@ -14,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,8 +169,6 @@ public class BoxService {
 
 
 
-
-
     // 유통기한 추가하며 새롭게 추가된 부분.
     private final Map<Long, TempScanResult> tempScanStorage = new ConcurrentHashMap<>();
     // 임시 저장된 바코드 값을 담은 것. (새로 추가함)
@@ -208,6 +204,38 @@ public class BoxService {
     public Optional<Long> findMemberIdByBarcode(String barcode) {
         // barcode → sessionId 맵핑 저장돼 있다고 가정
         return Optional.ofNullable(barcodeToMemberIdMap.get(barcode));
+    }
+
+
+
+    /* 알람 설정 관련 */
+
+    // ✅ 사용자별 기준일 저장용 (메모리 기반)
+    private final Map<Long, Integer> userNotifyMap = new HashMap<>();
+
+    private final int DEFAULT_NOTIFY_DAYS = 14;
+
+    /**
+     * ✅ 기준일 저장 (사용자별 설정 값 저장)
+     */
+    public void setNotifyStandard(Long memberId, int standardDays) {
+        userNotifyMap.put(memberId, standardDays);
+    }
+
+    /**
+     * ✅ 기준일 이내 유통기한 도래 상품 조회
+     */
+    public List<NotifyItemDto> getItemsExpiringSoon(Long memberId, Integer requestStandardDays) {
+        int standardDays = Optional.ofNullable(requestStandardDays)
+                .orElse(userNotifyMap.getOrDefault(memberId, DEFAULT_NOTIFY_DAYS));
+
+        LocalDate threshold = LocalDate.now().plusDays(standardDays);
+
+        List<Item> items = itemRepository.findItemsByMemberIdAndExpireDateLessThanEqual(memberId, threshold);
+
+        return items.stream()
+                .map(NotifyItemDto::from)
+                .toList();
     }
 
 }
