@@ -28,6 +28,8 @@ public class SecurityConfig {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of(
                             "http://localhost:3000",
+                            "http://localhost:5173",
+                            "http://keepbara.duckdns.org",
                             "http://keepbara.duckdns.org:8082",
                             "http://localhost:8082"
                             ));
