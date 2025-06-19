@@ -69,6 +69,8 @@ public class AuthController {
         }
 
         session.setAttribute("memberId", member.getId());
+        session.setAttribute("memberName", member.getName());
+
         // return ResponseEntity.ok("로그인 성공");
         return ResponseEntity.ok(
                 Map.of(
@@ -86,4 +88,26 @@ public class AuthController {
         session.invalidate();
         return ResponseEntity.ok("로그아웃 완료");
     }
+
+    @GetMapping("/session-check")
+    public ResponseEntity<Map<String, Object>> sessionCheck(HttpSession session) {
+        Object memberId = session.getAttribute("memberId");
+        Object memberName = session.getAttribute("memberName");
+
+        if (memberId == null || memberName == null) {
+            return ResponseEntity.ok(Map.of(
+                    "loginStatus", false,
+                    "message", "세션 없음 (로그인 안됨)"
+            ));
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "loginStatus", true,
+                "id", memberId,
+                "name", memberName
+        ));
+    }
+
+
+
 }
