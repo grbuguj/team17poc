@@ -2,14 +2,19 @@ package com.team17.poc.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
+import java.util.Collections;
+
+@Entity
 @Getter
 @Setter
 @NoArgsConstructor
-@Entity
-public class Member {
+public class Member implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,11 +25,39 @@ public class Member {
 
     private String name;
 
-    private String password;    // 일반 로그인만 사용
+    private String password;
 
-    private String provider;    // 'local' or 'google'
-    private String providerId;  // 구글 sub 값
+    private String provider;
+    private String providerId;
 
+    // 👇 권한 하나만 부여 (예시: ROLE_USER)
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.emptyList(); // 혹은 ROLE_USER 지정 원하면 따로 설정 가능
+    }
 
-    // 필요시 생성자/Getter/Setter 추가 (또는 @Data, @Builder 등 Lombok 활용)
+    @Override
+    public String getUsername() {
+        return email;  // 로그인 식별자로 email 사용
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

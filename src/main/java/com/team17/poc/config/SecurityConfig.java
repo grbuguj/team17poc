@@ -51,7 +51,10 @@ public class SecurityConfig {
                                 "/api/box/items/shot-expire",
                                 "/api/box/items/session-id",
                                 "/api/box/locations/**",
-                                "/api/box/**"
+                                "/api/box/**",
+                                "/product-test.html",
+                                "/api/products/**",
+                                "/uploads/**"
                         ).permitAll()
                         .requestMatchers(
                                 "/barcode/**", "/ocr/**", "/scanBarcode"
