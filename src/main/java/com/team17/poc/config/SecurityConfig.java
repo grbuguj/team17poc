@@ -54,7 +54,7 @@ public class SecurityConfig {
                                 "/api/box/**"
                         ).permitAll()
                         .requestMatchers(
-                                "/barcode/**", "/ocr/**"
+                                "/barcode/**", "/ocr/**", "/scanBarcode"
                         ).authenticated()
                         .anyRequest().authenticated()
                 )

@@ -26,18 +26,19 @@
             fetch("/scanBarcode", {
                 method: "POST",
                 body: formData,
-                credentials: "include" // ✅ 세션 쿠키 포함!
+                credentials: "include"
             })
                 .then(response => {
                     if (response.redirected) {
-                        // 인증 끊긴 경우 로그인 페이지로 리디렉션됨
                         window.location.href = response.url;
                     } else {
-                        return response.text();
+                        // 서버가 직접 barcodeImage.html 렌더링했는지 확인
+                        return response.text().then(html => {
+                            document.open();
+                            document.write(html);
+                            document.close();
+                        });
                     }
-                })
-                .then(html => {
-                    document.body.innerHTML = html;
                 })
                 .catch(error => {
                     console.error("바코드 업로드 오류:", error);
