@@ -1,32 +1,27 @@
 package com.team17.poc.products.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder  // 이거 있어야 builder() 사용 가능
 public class ProductImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 실제 필드명과 일치시켜야 함
-    @Column(nullable = false)
-    private String imageUrl;
+    private String originalName;  // ← 이 필드가 반드시 있어야 함
 
-    @Column(nullable = false)
-    private int imageOrder; // 0~4
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    @Column(nullable = true)
     private String storedName;
 
+    private int imageOrder;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
 }
