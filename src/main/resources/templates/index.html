@@ -9,44 +9,15 @@
 </head>
 <body>
 <div class="container">
-    <!-- 바코드 업로드 영역 -->
+    <!-- 왼쪽 박스: 바코드 찍기 -->
     <div class="box" id="barcode-box">
         <h2>바코드 찍기</h2>
-        <label for="file">바코드 이미지 업로드:</label>
-        <input type="file" id="file" required />
-        <button onclick="uploadBarcode()">스캔</button>
+        <form action="/scanBarcode" method="post" enctype="multipart/form-data">
+            <label for="file">바코드 이미지 업로드:</label>
+            <input type="file" name="file" id="file" required>
+            <button type="submit">스캔</button>
+        </form>
     </div>
-
-    <script>
-        function uploadBarcode() {
-            const fileInput = document.getElementById("file");
-            const formData = new FormData();
-            formData.append("file", fileInput.files[0]);
-
-            fetch("/scanBarcode", {
-                method: "POST",
-                body: formData,
-                credentials: "include"
-            })
-                .then(response => {
-                    if (response.redirected) {
-                        window.location.href = response.url;
-                    } else {
-                        // 서버가 직접 barcodeImage.html 렌더링했는지 확인
-                        return response.text().then(html => {
-                            document.open();
-                            document.write(html);
-                            document.close();
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error("바코드 업로드 오류:", error);
-                    alert("스캔 중 오류가 발생했습니다.");
-                });
-        }
-    </script>
-
 
     <!-- 오른쪽 박스: 날짜 인식 -->
     <div class="box" id="date-box">
