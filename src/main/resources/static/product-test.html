@@ -160,6 +160,10 @@
       if (!response.ok) throw new Error("상세 조회 실패");
 
       const product = await response.json();
+      let url = product.openChatUrl;
+      if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
 
       const detail = document.getElementById('productDetail');
       detail.innerHTML = `
@@ -172,7 +176,7 @@
         <strong>거래유형:</strong> ${product.type}<br>
         <strong>장소:</strong> ${product.location}<br>
         <strong>상세설명:</strong><br>${product.description}<br>
-        <strong>오픈채팅:</strong> <a href="${product.openChatUrl}" target="_blank" rel="noopener noreferrer">바로가기</a><br>
+        <strong>오픈채팅:</strong> <a href="${url}" target="_blank" rel="noopener noreferrer">바로가기</a><br>
         <strong>등록시간:</strong> ${product.timeAgo}
       `;
     } catch (err) {
