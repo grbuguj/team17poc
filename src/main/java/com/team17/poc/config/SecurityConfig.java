@@ -31,9 +31,8 @@ public class SecurityConfig {
                             "http://localhost:5173",
                             "http://keepbara.duckdns.org",
                             "http://keepbara.duckdns.org:8082",
-                            "https://keepbara.duckdns.org",
-                            "https://keepbara.duckdns.org:8082",
-                            "http://localhost:8082"
+                            "http://localhost:8082",
+                            "https://keepbara.duckdns.org"
                             ));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // PATCH 추가
                     config.setAllowedHeaders(List.of("*"));
@@ -57,7 +56,7 @@ public class SecurityConfig {
                                 "/uploads/**"
                         ).permitAll()
                         .requestMatchers(
-                                "/barcode/**", "/ocr/**", "/scanBarcode"
+                                "/barcode/**", "/ocr/**"
                         ).authenticated()
                         .anyRequest().authenticated()
                 )

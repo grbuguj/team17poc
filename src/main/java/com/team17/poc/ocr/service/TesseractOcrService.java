@@ -26,7 +26,13 @@ public class TesseractOcrService implements OcrService {
         String rawText;
         try {
             ITesseract tesseract = new Tesseract();
-            tesseract.setDatapath("C:/Program Files/Tesseract-OCR/tessdata");
+            // tesseract.setDatapath("C:/Program Files/Tesseract-OCR/tessdata");
+            String tessPath = System.getenv("TESSDATA_PREFIX");
+            if (tessPath == null || tessPath.isEmpty()) {
+                tessPath = "C:/Program Files/Tesseract-OCR";  // 로컬 개발 환경용
+            }
+            tesseract.setDatapath(tessPath + "/tessdata");
+
             tesseract.setLanguage("eng+kor");
             tesseract.setTessVariable("tessedit_char_whitelist", "0123456789:.년월일시분까지");
             tesseract.setPageSegMode(6);
