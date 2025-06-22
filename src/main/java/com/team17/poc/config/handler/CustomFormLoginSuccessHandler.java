@@ -26,7 +26,7 @@ public class CustomFormLoginSuccessHandler implements AuthenticationSuccessHandl
         if (redirectUrl != null) {
             request.getSession().removeAttribute("redirectUrl");
         } else {
-            redirectUrl = "https://keepbara-front.vercel.app/main"; // 기본값
+            redirectUrl = "https://2025-unithon-team-17-fe.vercel.app"; // 기본값
         }
 
         response.sendRedirect(redirectUrl);

@@ -36,7 +36,8 @@ public class SecurityConfig {
                             "http://keepbara.duckdns.org",
                             "http://keepbara.duckdns.org:8082",
                             "http://localhost:8082",
-                            "https://keepbara.duckdns.org"
+                            "https://keepbara.duckdns.org",
+                            "https://2025-unithon-team-17-fe.vercel.app"
                             ));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // PATCH 추가
                     config.setAllowedHeaders(List.of("*"));
