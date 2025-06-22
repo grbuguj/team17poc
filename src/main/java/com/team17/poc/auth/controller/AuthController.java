@@ -25,6 +25,14 @@ public class AuthController {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Operation(summary = "리다이렉트 URL 설정", description = "로그인 성공 후 리다이렉트할 URL을 세션에 저장합니다.")
+    @PostMapping("/set-redirect")
+    public ResponseEntity<?> setRedirectUrl(@RequestParam String redirectUrl, HttpSession session) {
+        session.setAttribute("redirectUrl", redirectUrl);
+        return ResponseEntity.ok(Map.of("message", "redirectUrl 저장 완료"));
+    }
+
+
     @Operation(summary = "회원가입", description = "이메일, 비밀번호, 이름을 입력받아 회원가입합니다.")
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
