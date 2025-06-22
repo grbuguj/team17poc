@@ -1,8 +1,7 @@
 package com.team17.poc.config;
 
 import com.team17.poc.auth.service.CustomOAuth2UserService;
-import com.team17.poc.config.handler.CustomFormLoginSuccessHandler;
-import com.team17.poc.config.handler.CustomOAuth2SuccessHandler;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +19,6 @@ import java.util.List;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final CustomFormLoginSuccessHandler customFormLoginSuccessHandler;
-    private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -69,12 +66,12 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .successHandler(customFormLoginSuccessHandler)
+                        .defaultSuccessUrl("https://2025-unithon-team-17-fe.vercel.app", true)
                         .permitAll()
                 )
                 .oauth2Login(oauth -> oauth
                         .loginPage("/login")
-                        .successHandler(customOAuth2SuccessHandler)
+                        .defaultSuccessUrl("https://2025-unithon-team-17-fe.vercel.app", true)
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                 );
 
