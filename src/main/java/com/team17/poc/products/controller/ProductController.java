@@ -53,15 +53,19 @@ public class ProductController {
 
     // ✅ 4. 즐겨찾기 토글
     @PostMapping("/{id}/favorite")
-    public ResponseEntity<Boolean> toggleFavorite(@PathVariable Long id,
-                                                  @AuthenticationPrincipal Member member) {
+    public ResponseEntity<Boolean> toggleFavorite(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal) {
+        Member member = userPrincipal.getMember();
         boolean result = productService.toggleFavorite(id, member);
         return ResponseEntity.ok(result);
     }
 
     // ✅ 5. 즐겨찾기 목록
     @GetMapping("/favorites")
-    public ResponseEntity<List<ProductListResponseDto>> getFavorites(@AuthenticationPrincipal Member member) {
+    public ResponseEntity<List<ProductListResponseDto>> getFavorites(
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal) {
+        Member member = userPrincipal.getMember();
         List<ProductListResponseDto> favorites = productService.getMyFavoriteProducts(member);
         return ResponseEntity.ok(favorites);
     }
