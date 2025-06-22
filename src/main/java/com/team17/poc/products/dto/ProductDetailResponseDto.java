@@ -1,5 +1,6 @@
 package com.team17.poc.products.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.team17.poc.products.entity.Product;
 import com.team17.poc.products.entity.ProductStatus;
 import com.team17.poc.products.entity.ProductType;
@@ -22,14 +23,15 @@ public class ProductDetailResponseDto {
     private ProductType type;
     private String location;
     private String openChatUrl;
-    private boolean isFavorite;
+
+    @JsonProperty("favorited") // ✅ JSON 필드명을 명시적으로 지정
+    private boolean favorited;
 
     private ProductStatus status;
     private LocalDateTime createdAt;
     private String sellerName;
     private List<String> imageUrls;
     private String timeAgo;
-
 
     public static ProductDetailResponseDto fromEntity(Product product, boolean isFavorite) {
         return ProductDetailResponseDto.builder()
@@ -42,11 +44,11 @@ public class ProductDetailResponseDto {
                 .type(product.getType())
                 .location(product.getLocation())
                 .openChatUrl(product.getOpenChatUrl())
-                .isFavorite(isFavorite)
+                .favorited(isFavorite) // ✅ 필드명 바뀐 것에 맞춰 변경
                 .status(product.getStatus())
                 .createdAt(product.getCreatedAt())
                 .timeAgo(TimeUtils.toTimeAgo(product.getCreatedAt()))
-                .sellerName(product.getMember().getName()) // 또는 .getEmail() 등
+                .sellerName(product.getMember().getName())
                 .imageUrls(product.getImages().stream()
                         .map(image -> "/images/" + image.getStoredName())
                         .toList())
