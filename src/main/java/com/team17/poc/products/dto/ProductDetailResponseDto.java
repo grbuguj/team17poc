@@ -2,6 +2,7 @@ package com.team17.poc.products.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.team17.poc.products.entity.Product;
+import com.team17.poc.products.entity.ProductImage;
 import com.team17.poc.products.entity.ProductStatus;
 import com.team17.poc.products.entity.ProductType;
 import com.team17.poc.util.TimeUtils;
@@ -24,16 +25,17 @@ public class ProductDetailResponseDto {
     private String location;
     private String openChatUrl;
 
-    @JsonProperty("favorited") // ✅ JSON 필드명을 명시적으로 지정
+    @JsonProperty("favorited")
     private boolean favorited;
 
     private ProductStatus status;
     private LocalDateTime createdAt;
     private String sellerName;
-    private List<String> imageUrls;
     private String timeAgo;
 
-    public static ProductDetailResponseDto fromEntity(Product product, boolean isFavorite) {
+    private List<ProductImageResponseDto> images; // ✅ 이미지 정보 리스트 추가
+
+    public static ProductDetailResponseDto fromEntity(Product product, boolean isFavorite, List<ProductImage> imageEntities) {
         return ProductDetailResponseDto.builder()
                 .id(product.getId())
                 .title(product.getTitle())
@@ -44,13 +46,13 @@ public class ProductDetailResponseDto {
                 .type(product.getType())
                 .location(product.getLocation())
                 .openChatUrl(product.getOpenChatUrl())
-                .favorited(isFavorite) // ✅ 필드명 바뀐 것에 맞춰 변경
+                .favorited(isFavorite)
                 .status(product.getStatus())
                 .createdAt(product.getCreatedAt())
                 .timeAgo(TimeUtils.toTimeAgo(product.getCreatedAt()))
                 .sellerName(product.getMember().getName())
-                .imageUrls(product.getImages().stream()
-                        .map(image -> "/images/" + image.getStoredName())
+                .images(imageEntities.stream()
+                        .map(ProductImageResponseDto::fromEntity)
                         .toList())
                 .build();
     }

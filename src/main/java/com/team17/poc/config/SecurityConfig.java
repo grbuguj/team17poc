@@ -1,15 +1,16 @@
 package com.team17.poc.config;
 
 import com.team17.poc.auth.service.CustomOAuth2UserService;
-
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
@@ -24,7 +25,6 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                // front api 테스트 시, cors 에러 발생하여 추가함.
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of(
@@ -35,8 +35,8 @@ public class SecurityConfig {
                             "http://localhost:8082",
                             "https://keepbara.duckdns.org",
                             "https://2025-unithon-team-17-fe.vercel.app"
-                            ));
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // PATCH 추가
+                    ));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowCredentials(true);
                     return config;
@@ -45,25 +45,33 @@ public class SecurityConfig {
                         .requestMatchers("/", "/api/auth/**", "/oauth2/**", "/css/**",
                                 "/js/**", "/images/**", "/favicon.ico", "/login",
                                 "/authlogin", "/signup", "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/api-docs/**",
+                                "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**",
                                 "/api/box/items/shot-barcode",
                                 "/api/box/items/shot-expire",
                                 "/api/box/items/session-id",
-                                "/api/box/locations/**",
-                                "/api/box/**",
-                                "/product-test.html",
-                                "/api/products/**",
-                                "/api/mypage/**",
-                                "/uploads/**"
+                                "/api/box/locations/**", "/api/box/**",
+                                "/api/products/**", "/api/mypage/**",
+                                "/product-test.html", "/uploads/**"
+
                         ).permitAll()
-                        .requestMatchers(
-                                "/barcode/**", "/ocr/**"
-                        ).authenticated()
+
+                        // ✅ 상품 목록/상세 조회는 모두 허용
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+
+                        // ✅ 상품 등록/수정/삭제는 로그인 필요
+                        .requestMatchers(HttpMethod.POST, "/api/products").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
+
+                        // ✅ 기타는 인증 필요
+                        .requestMatchers("/barcode/**", "/ocr/**").authenticated()
                         .anyRequest().authenticated()
                 )
-
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인이 필요합니다")
+                        )
+                )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
@@ -79,7 +87,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ 비밀번호 암호화용 Bean 등록 (회원가입/로그인용)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
