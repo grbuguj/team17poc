@@ -50,7 +50,9 @@ public class SecurityConfig {
                                 "/api/box/items/shot-expire",
                                 "/api/box/items/session-id",
                                 "/api/box/locations/**", "/api/box/**",
+                                "/api/products/**", "/api/mypage/**",
                                 "/product-test.html", "/uploads/**"
+
                         ).permitAll()
 
                         // ✅ 상품 목록/상세 조회는 모두 허용
