@@ -55,6 +55,7 @@ public class SecurityConfig {
                                 "/api/box/**",
                                 "/product-test.html",
                                 "/api/products/**",
+                                "/api/mypage/**",
                                 "/uploads/**"
                         ).permitAll()
                         .requestMatchers(
