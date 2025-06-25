@@ -25,6 +25,19 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
+@CrossOrigin(
+        origins = {
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://keepbara.duckdns.org",
+                "http://keepbara.duckdns.org:8082",
+                "http://localhost:8082",
+                "https://keepbara.duckdns.org",
+                "https://2025-unithon-team-17-fe.vercel.app"
+        },
+        allowCredentials = "true"
+)
+
 @RestController
 @RequestMapping("/api/box")
 @RequiredArgsConstructor

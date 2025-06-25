@@ -11,4 +11,7 @@ import java.util.List;
 public interface ProductImageRepository extends JpaRepository<ProductImage, Long> {
 
     List<ProductImage> findByProductOrderByImageOrderAsc(Product product);
+
+    ProductImage findFirstByProductOrderByImageOrderAsc(Product product);
+
 }

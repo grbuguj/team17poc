@@ -2,11 +2,9 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>상품 및 즐겨찾기 통합 테스트</title>
+  <title>상품 통합 테스트</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
+    body { font-family: Arial, sans-serif; }
     .product-card {
       border: 1px solid #ccc;
       padding: 12px;
@@ -20,14 +18,24 @@
       max-height: 200px;
       object-fit: cover;
     }
-    .section {
-      margin-bottom: 40px;
-    }
+    .section { margin-bottom: 40px; }
     .detail-section {
       margin-top: 40px;
       padding: 20px;
       border: 2px solid #444;
       max-width: 600px;
+    }
+    .image-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+    }
+    .image-scroll img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -48,7 +56,7 @@
       <option value="CAFE">카페 거래</option>
       <option value="DIRECT">직거래</option>
     </select><br><br>
-    <input type="file" name="image"><br><br>
+    <input type="file" name="images" id="imageInput" multiple><br><br>
     <button type="submit">상품 등록</button>
   </form>
 </div>
@@ -73,12 +81,34 @@
   <em>카드를 클릭하면 상세정보가 이곳에 표시됩니다.</em>
 </div>
 
+<h2>상품 수정 및 삭제</h2>
+<div id="editSection" class="detail-section">
+  <h3>수정/삭제 대상 상품 ID: <span id="editProductId">선택 전</span></h3>
+  <form id="editForm">
+    <input type="text" name="title" placeholder="제목 수정"><br>
+    <textarea name="description" placeholder="설명 수정"></textarea><br>
+    <input type="number" name="originalPrice" placeholder="정가 수정"><br>
+    <input type="number" name="salePrice" placeholder="판매가 수정"><br>
+    <input type="number" name="quantity" placeholder="수량 수정"><br>
+    <input type="text" name="location" placeholder="거래 장소 수정"><br>
+    <input type="text" name="openChatUrl" placeholder="오픈채팅 URL 수정"><br>
+    <select name="type">
+      <option value="">-- 거래 유형 선택 --</option>
+      <option value="CAFE">카페 거래</option>
+      <option value="DIRECT">직거래</option>
+    </select><br><br>
+    <button type="submit">상품 수정</button>
+    <button type="button" onclick="deleteProduct()">상품 삭제</button>
+  </form>
+</div>
+
 <script>
+  let selectedProductId = null;
+
   document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
     const formData = new FormData();
-
     const dto = {
       title: form.title.value,
       description: form.description.value,
@@ -89,65 +119,46 @@
       openChatUrl: form.openChatUrl.value,
       type: form.type.value
     };
-
     formData.append("requestDto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
-    if (form.image.files.length > 0) {
-      formData.append("image", form.image.files[0]);
+    for (let i = 0; i < form.images.files.length; i++) {
+      formData.append("images", form.images.files[i]);
     }
-
-    try {
-      const response = await fetch("/api/products", {
-        method: "POST",
-        body: formData
-      });
-
-      if (!response.ok) throw new Error("등록 실패");
-
-      alert("상품 등록 완료");
+    const response = await fetch("/api/products", { method: "POST", body: formData });
+    if (response.ok) {
+      alert("등록 완료");
       form.reset();
       fetchProducts();
-    } catch (err) {
-      alert("상품 등록 오류: " + err.message);
+    } else {
+      alert("등록 실패");
     }
   });
 
   async function fetchProducts() {
     const type = document.getElementById('typeFilter').value;
     const url = type ? `/api/products?type=${type}` : `/api/products`;
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('서버 오류');
-
-      const data = await response.json();
-      renderProductList(data);
-    } catch (err) {
-      alert('상품 목록 불러오기 실패: ' + err.message);
-    }
+    const res = await fetch(url);
+    const data = await res.json();
+    renderProductList(data);
   }
 
   async function fetchFavorites() {
-    try {
-      const response = await fetch('/api/products/favorites');
-      const data = await response.json();
-      renderProductList(data, true);
-    } catch (err) {
-      alert('즐겨찾기 목록 오류: ' + err.message);
-    }
+    const res = await fetch("/api/products/favorites");
+    const data = await res.json();
+    renderProductList(data);
   }
 
-  function renderProductList(products, isFavorite = false) {
+  function renderProductList(products) {
     const list = document.getElementById('productList');
     list.innerHTML = '';
-
     if (products.length === 0) {
       list.innerHTML = '<p>조회된 상품이 없습니다.</p>';
       return;
     }
-
     products.forEach(product => {
       const div = document.createElement('div');
       div.className = 'product-card';
+      const star = product.favorited ? '⭐' : '☆';
+      const label = product.favorited ? '즐겨찾기 해제' : '즐겨찾기 등록';
       div.innerHTML = `
         <img class="product-image" src="${product.thumbnail}" alt="썸네일"><br>
         <strong>${product.title}</strong><br>
@@ -155,7 +166,7 @@
         판매자: ${product.sellerName}<br>
         등록 시간: ${product.timeAgo}<br>
         위치: ${product.location}<br>
-        <button onclick="toggleFavorite(${product.id}, this)">⭐ 즐겨찾기 토글</button>
+        <button onclick="toggleFavorite(${product.id}, this)">${star} ${label}</button>
       `;
       div.addEventListener('click', () => fetchProductDetail(product.id));
       list.appendChild(div);
@@ -163,59 +174,79 @@
   }
 
   async function fetchProductDetail(productId) {
-    try {
-      const response = await fetch(`/api/products/${productId}`);
-      if (!response.ok) throw new Error("상세 조회 실패");
+    const response = await fetch(`/api/products/${productId}`);
+    const product = await response.json();
+    selectedProductId = productId;
+    document.getElementById('editProductId').innerText = productId;
 
-      const product = await response.json();
-      let url = product.openChatUrl;
-      if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-      }
-
-      const detail = document.getElementById('productDetail');
-      detail.innerHTML = `
-        <h3>${product.title}</h3>
-        <img class="product-image" src="${product.imageUrls[0]}" alt="썸네일"><br>
-        <strong>판매자:</strong> ${product.sellerName}<br>
-        <strong>정가:</strong> ${product.originalPrice.toLocaleString()}원<br>
-        <strong>판매가:</strong> ${product.salePrice.toLocaleString()}원<br>
-        <strong>수량:</strong> ${product.quantity}<br>
-        <strong>거래유형:</strong> ${product.type}<br>
-        <strong>장소:</strong> ${product.location}<br>
-        <strong>상세설명:</strong><br>${product.description}<br>
-        <strong>오픈채팅:</strong> <a href="${url}" target="_blank" rel="noopener noreferrer">바로가기</a><br>
-        <strong>등록시간:</strong> ${product.timeAgo}<br>
-        <button onclick="toggleFavorite(${product.id})">⭐ 즐겨찾기 토글</button>
-      `;
-    } catch (err) {
-      alert("상세정보 불러오기 실패: " + err.message);
-    }
+    const detail = document.getElementById('productDetail');
+    detail.innerHTML = `
+      <h3>${product.title}</h3>
+      <div class="image-scroll">
+        ${product.images.map(img => `<img src="/images/${img.storedName}" alt="이미지">`).join('')}
+      </div>
+      <strong>판매자:</strong> ${product.sellerName}<br>
+      <strong>정가:</strong> ${product.originalPrice.toLocaleString()}원<br>
+      <strong>판매가:</strong> ${product.salePrice.toLocaleString()}원<br>
+      <strong>수량:</strong> ${product.quantity}<br>
+      <strong>거래유형:</strong> ${product.type}<br>
+      <strong>장소:</strong> ${product.location}<br>
+      <strong>상세설명:</strong><br>${product.description}<br>
+      <strong>오픈채팅:</strong> <a href="${product.openChatUrl}" target="_blank">바로가기</a><br>
+      <strong>등록시간:</strong> ${product.timeAgo}<br>
+      <button onclick="toggleFavorite(${product.id}, this)">
+        ${product.favorited ? "⭐ 즐겨찾기 해제" : "☆ 즐겨찾기 등록"}
+      </button>
+    `;
   }
 
-  async function toggleFavorite(productId, button = null) {
-    try {
-      const response = await fetch(`/api/products/${productId}/favorite`, {
-        method: 'POST'
-      });
+  async function toggleFavorite(productId, button) {
+    const res = await fetch(`/api/products/${productId}/favorite`, { method: 'POST' });
+    const result = await res.json();
+    const isFavorited = result === true;
+    if (button) {
+      button.innerText = isFavorited ? '⭐ 즐겨찾기 해제' : '☆ 즐겨찾기 등록';
+    }
+    alert(isFavorited ? "즐겨찾기 등록됨" : "즐겨찾기 해제됨");
+  }
 
-      if (!response.ok) throw new Error("즐겨찾기 토글 실패");
+  document.getElementById('editForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!selectedProductId) return alert("먼저 상품을 선택하세요.");
+    const form = e.target;
+    const formData = new FormData();
+    for (const input of form.elements) {
+      if (input.name && input.value) formData.append(input.name, input.value);
+    }
+    const res = await fetch(`/api/products/${selectedProductId}`, {
+      method: "PUT",
+      body: formData
+    });
+    if (res.ok) {
+      alert("상품 수정 완료");
+      fetchProductDetail(selectedProductId);
+      fetchProducts();
+    } else {
+      alert("수정 실패");
+    }
+  });
 
-      const result = await response.json();
-      alert(result ? "즐겨찾기 등록됨" : "즐겨찾기 해제됨");
-
-      if (button) {
-        button.innerText = result ? "⭐ 즐겨찾기 해제" : "⭐ 즐겨찾기 등록";
-      }
-
-      // 필요 시 목록 새로고침
-      // fetchProducts();
-    } catch (err) {
-      alert("오류: " + err.message);
+  async function deleteProduct() {
+    if (!selectedProductId) return alert("먼저 상품을 선택하세요.");
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+    const res = await fetch(`/api/products/${selectedProductId}`, { method: 'DELETE' });
+    if (res.ok) {
+      alert("삭제 완료");
+      document.getElementById('productDetail').innerHTML = '';
+      document.getElementById('editProductId').innerText = '선택 전';
+      fetchProducts();
+    } else {
+      alert("삭제 실패");
     }
   }
 
   window.onload = fetchProducts;
 </script>
+
 </body>
 </html>

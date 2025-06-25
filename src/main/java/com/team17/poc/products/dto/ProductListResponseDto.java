@@ -1,5 +1,6 @@
 package com.team17.poc.products.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.team17.poc.products.entity.Product;
 import com.team17.poc.products.entity.ProductType;
 import com.team17.poc.util.TimeUtils;
@@ -14,12 +15,16 @@ public class ProductListResponseDto {
     private ProductType type;
     private String location;
     private String thumbnail;
-    private String timeAgo;     // ✅ 추가
-    private String sellerName;  // ✅ 추가
+    private String timeAgo;
+    private String sellerName;
+
+    @JsonProperty("favorited")
+    private boolean favorited; // ✅ 즐겨찾기 여부 추가
 
     @Builder
     public ProductListResponseDto(Long id, String title, int salePrice, ProductType type,
-                                  String location, String thumbnail, String timeAgo, String sellerName) {
+                                  String location, String thumbnail, String timeAgo,
+                                  String sellerName, boolean favorited) {
         this.id = id;
         this.title = title;
         this.salePrice = salePrice;
@@ -28,18 +33,26 @@ public class ProductListResponseDto {
         this.thumbnail = thumbnail;
         this.timeAgo = timeAgo;
         this.sellerName = sellerName;
+        this.favorited = favorited;
     }
 
-    public static ProductListResponseDto fromEntity(Product product) {
+    // 기본: 즐겨찾기 여부 false
+    public static ProductListResponseDto fromEntity(Product product, String thumbnailUrl) {
+        return fromEntity(product, thumbnailUrl, false);
+    }
+
+    // 오버로드: 즐겨찾기 여부 명시
+    public static ProductListResponseDto fromEntity(Product product, String thumbnailUrl, boolean isFavorite) {
         return ProductListResponseDto.builder()
                 .id(product.getId())
                 .title(product.getTitle())
                 .salePrice(product.getSalePrice())
                 .type(product.getType())
                 .location(product.getLocation())
-                .thumbnail(product.getThumbnailUrl())
-                .timeAgo(TimeUtils.toTimeAgo(product.getCreatedAt()))    // ✅ 시간 가공
-                .sellerName(product.getMember().getName())                // ✅ 판매자 이름
+                .thumbnail(thumbnailUrl)
+                .timeAgo(TimeUtils.toTimeAgo(product.getCreatedAt()))
+                .sellerName(product.getMember().getName())
+                .favorited(isFavorite) // ✅ 반영
                 .build();
     }
 }
