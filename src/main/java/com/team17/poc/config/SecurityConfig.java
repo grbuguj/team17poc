@@ -51,7 +51,8 @@ public class SecurityConfig {
                                 "/api/box/items/session-id",
                                 "/api/box/locations/**", "/api/box/**",
                                 "/api/products/**", "/api/mypage/**",
-                                "/product-test.html", "/uploads/**"
+                                "/product-test.html", "/uploads/**",
+                                "/mypage-test.html"
 
                         ).permitAll()
 

@@ -3,6 +3,8 @@ package com.team17.poc.auth.service;
 import com.team17.poc.auth.entity.Member;
 import com.team17.poc.auth.model.CustomUserPrincipal;
 import com.team17.poc.auth.repository.MemberRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,6 +14,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.*;
 
@@ -82,6 +86,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 "nickname"
         );
          */
+
+        // 🔽 추가: 세션에 memberId와 name 저장
+        HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        HttpSession session = httpRequest.getSession();
+        session.setAttribute("memberId", member.getId());
+        session.setAttribute("memberName", member.getName());
+
 
         return new CustomUserPrincipal(member, customAttributes);
 

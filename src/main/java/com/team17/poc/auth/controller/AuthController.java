@@ -123,6 +123,28 @@ public class AuthController {
         ));
     }
 
+    // 추가 - 마이페이지 인증 관련
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(HttpSession session) {
+        Long memberId = (Long) session.getAttribute("memberId");
+
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "로그인이 필요합니다."));
+        }
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        // provider 값으로 로컬/소셜 구분
+        boolean isSocial = !"local".equalsIgnoreCase(member.getProvider());
+
+        return ResponseEntity.ok(Map.of(
+                "email", member.getEmail(),
+                "isSocial", isSocial
+        ));
+    }
+
 
 
 }
