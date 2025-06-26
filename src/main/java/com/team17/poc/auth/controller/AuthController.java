@@ -3,13 +3,20 @@ package com.team17.poc.auth.controller;
 import com.team17.poc.auth.dto.LoginRequest;
 import com.team17.poc.auth.dto.SignupRequest;
 import com.team17.poc.auth.entity.Member;
+import com.team17.poc.auth.model.CustomUserPrincipal;
 import com.team17.poc.auth.repository.MemberRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -81,12 +88,14 @@ public class AuthController {
         session.setAttribute("memberId", member.getId());
         session.setAttribute("memberName", member.getName());
 
-        // Spring Security 인증 객체 설정
+        CustomUserPrincipal customUserPrincipal = new CustomUserPrincipal(member);
         UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(member, null, member.getAuthorities());
+                new UsernamePasswordAuthenticationToken(customUserPrincipal, null, customUserPrincipal.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // return ResponseEntity.ok("로그인 성공");
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                SecurityContextHolder.getContext());
+
         return ResponseEntity.ok(
                 Map.of(
                         "message", "로그인 성공",
@@ -97,31 +106,48 @@ public class AuthController {
         );
     }
 
-    @Operation(summary = "로그아웃", description = "세션을 만료시켜 로그아웃합니다.")
+    @Operation(summary = "로그아웃", description = "현재 로그인된 사용자의 세션과 인증 정보를 모두 초기화하여 로그아웃합니다.")
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate();
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
         return ResponseEntity.ok("로그아웃 완료");
     }
 
+    @Operation(summary = "세션 확인", description = "현재 세션 기반 로그인 상태를 확인합니다. 로그인된 경우 사용자 ID와 이름을 반환합니다.")
     @GetMapping("/session-check")
     public ResponseEntity<Map<String, Object>> sessionCheck(HttpSession session) {
-        Object memberId = session.getAttribute("memberId");
-        Object memberName = session.getAttribute("memberName");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (memberId == null || memberName == null) {
+        boolean isAuthenticated = authentication != null &&
+                authentication.isAuthenticated() &&
+                !(authentication instanceof AnonymousAuthenticationToken);
+
+        if (!isAuthenticated) {
             return ResponseEntity.ok(Map.of(
                     "loginStatus", false,
-                    "message", "세션 없음 (로그인 안됨)"
+                    "message", "인증 안됨"
             ));
         }
 
+        Long memberId = (Long) session.getAttribute("memberId"); // local 로그인용
+        String memberName = (String) session.getAttribute("memberName");
+
+        // OAuth 로그인 사용자는 Principal 객체에서 정보 꺼내기
+        Object principal = authentication.getPrincipal();
+        String oauthName = (principal instanceof org.springframework.security.core.userdetails.User)
+                ? ((org.springframework.security.core.userdetails.User) principal).getUsername()
+                : principal.toString();
+
         return ResponseEntity.ok(Map.of(
                 "loginStatus", true,
-                "id", memberId,
-                "name", memberName
+                "id", memberId != null ? memberId : null,
+                "name", memberName != null ? memberName : oauthName
         ));
     }
+
 
     // 추가 - 마이페이지 인증 관련
     @GetMapping("/me")

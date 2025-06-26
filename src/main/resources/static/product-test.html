@@ -41,6 +41,11 @@
 </head>
 <body>
 
+<div style="margin-bottom: 20px;">
+  <button onclick="checkSession()">🔍 세션 체크</button>
+  <button onclick="logout()">🚪 로그아웃</button>
+</div>
+
 <h1>상품 등록</h1>
 <div class="section">
   <form id="productForm" enctype="multipart/form-data">
@@ -124,7 +129,13 @@
     for (let i = 0; i < form.images.files.length; i++) {
       formData.append("images", form.images.files[i]);
     }
-    const response = await fetch("/api/products", { method: "POST", body: formData });
+    const response = await fetch("/api/products",
+      {
+      method: "POST",
+      body: formData,
+      credentials: 'include'
+      }
+      );
 
     if (response.ok) {
       alert("등록 완료");
@@ -243,7 +254,7 @@
   async function deleteProduct() {
     if (!selectedProductId) return alert("먼저 상품을 선택하세요.");
     if (!confirm("정말 삭제하시겠습니까?")) return;
-    const res = await fetch(`/api/products/${selectedProductId}`, { method: 'DELETE' });
+    const res = await fetch(`/api/products/${selectedProductId}`, { method: 'DELETE', credentials: 'include' });
 
     if (res.status === 401) {
       alert("로그인 후 이용해 주세요.");
@@ -263,6 +274,28 @@
       fetchProducts();
     } else {
       alert("삭제 실패");
+    }
+  }
+
+  async function checkSession() {
+    const res = await fetch("/api/members/session-check", {
+      credentials: 'include'
+    });
+    const data = await res.json();
+    alert(JSON.stringify(data, null, 2));
+  }
+
+  async function logout() {
+    const res = await fetch("/api/members/logout", {
+      method: "POST",
+      credentials: 'include'
+    });
+
+    if (res.ok) {
+      alert("로그아웃 완료");
+      location.reload();
+    } else {
+      alert("로그아웃 실패");
     }
   }
 
