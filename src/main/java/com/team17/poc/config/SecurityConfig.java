@@ -52,19 +52,13 @@ public class SecurityConfig {
                                 "/api/box/locations/**", "/api/box/**",
                                 "/api/products/**", "/api/mypage/**",
                                 "/product-test.html", "/uploads/**",
-                                "/mypage-test.html"
-
+                                "/mypage-test.html",
+                                "/login/success"  // ✅ 추가
                         ).permitAll()
-
-                        // ✅ 상품 목록/상세 조회는 모두 허용
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-
-                        // ✅ 상품 등록/수정/삭제는 로그인 필요
                         .requestMatchers(HttpMethod.POST, "/api/products").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
-
-                        // ✅ 기타는 인증 필요
                         .requestMatchers("/barcode/**", "/ocr/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -76,12 +70,12 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("https://2025-unithon-team-17-fe.vercel.app", true)
+                        .defaultSuccessUrl("/api/auth/login/success", true)  // ✅ 내부 리디렉션 경로
                         .permitAll()
                 )
                 .oauth2Login(oauth -> oauth
                         .loginPage("/login")
-                        .defaultSuccessUrl("https://2025-unithon-team-17-fe.vercel.app", true)
+                        .defaultSuccessUrl("/api/auth/login/success", true)  // ✅ 동일 처리
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                 );
 

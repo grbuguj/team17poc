@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,6 +40,10 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "redirectUrl 저장 완료"));
     }
 
+    @GetMapping("/login/success")
+    public void redirectToFrontend(HttpServletResponse response) throws IOException {
+        response.sendRedirect("https://2025-unithon-team-17-fe.vercel.app/home/main");
+    }
 
     @Operation(summary = "회원가입", description = "이메일, 비밀번호, 이름을 입력받아 회원가입합니다.")
     @PostMapping("/signup")
