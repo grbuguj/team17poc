@@ -191,6 +191,7 @@ public class ProductServiceImpl implements ProductService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 수정할 수 있습니다.");
         }
 
+
         // 내용 업데이트
         product.setTitle(request.getTitle());
         product.setDescription(request.getDescription());
@@ -227,6 +228,30 @@ public class ProductServiceImpl implements ProductService {
 
         // 상품 삭제
         productRepository.delete(product);
+    }
+
+    @Override
+    public List<ProductListResponseDto> getMySellList(Member member) {
+        List<Product> products = productRepository.findByMember(member);
+
+        Set<Long> favoriteIds = favoriteRepository.findByMember(member).stream()
+                .map(fav -> fav.getProduct().getId())
+                .collect(Collectors.toSet());
+
+        return products.stream()
+                .map(product -> {
+                    ProductImage thumbnail = productImageRepository
+                            .findFirstByProductOrderByImageOrderAsc(product);
+
+                    String thumbnailUrl = (thumbnail != null)
+                            ? "/images/" + thumbnail.getStoredName()
+                            : "/images/default.jpg";
+
+                    boolean isFavorited = favoriteIds.contains(product.getId());
+
+                    return ProductListResponseDto.fromEntity(product, thumbnailUrl, isFavorited);
+                })
+                .toList();
     }
 
 
