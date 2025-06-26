@@ -11,6 +11,7 @@ import lombok.Getter;
 public class ProductListResponseDto {
     private Long id;
     private String title;
+    private int originalPrice;
     private int salePrice;
     private ProductType type;
     private String location;
@@ -22,11 +23,12 @@ public class ProductListResponseDto {
     private boolean favorited; // ✅ 즐겨찾기 여부 추가
 
     @Builder
-    public ProductListResponseDto(Long id, String title, int salePrice, ProductType type,
+    public ProductListResponseDto(Long id, String title, int originalPrice, int salePrice, ProductType type,
                                   String location, String thumbnail, String timeAgo,
                                   String sellerName, boolean favorited) {
         this.id = id;
         this.title = title;
+        this.originalPrice = originalPrice;
         this.salePrice = salePrice;
         this.type = type;
         this.location = location;
@@ -35,6 +37,7 @@ public class ProductListResponseDto {
         this.sellerName = sellerName;
         this.favorited = favorited;
     }
+
 
     // 기본: 즐겨찾기 여부 false
     public static ProductListResponseDto fromEntity(Product product, String thumbnailUrl) {
@@ -46,13 +49,15 @@ public class ProductListResponseDto {
         return ProductListResponseDto.builder()
                 .id(product.getId())
                 .title(product.getTitle())
+                .originalPrice(product.getOriginalPrice()) // ✅ 원가 포함
                 .salePrice(product.getSalePrice())
                 .type(product.getType())
                 .location(product.getLocation())
                 .thumbnail(thumbnailUrl)
                 .timeAgo(TimeUtils.toTimeAgo(product.getCreatedAt()))
                 .sellerName(product.getMember().getName())
-                .favorited(isFavorite) // ✅ 반영
+                .favorited(isFavorite)
                 .build();
     }
+
 }
