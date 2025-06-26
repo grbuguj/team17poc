@@ -57,22 +57,22 @@ public class ProductController {
 
 
     // ✅ 상품 수정
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/{id}")
     public ResponseEntity<String> updateProduct(
             @PathVariable Long id,
-            @RequestPart("requestDto") @Valid ProductUpdateDto request,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestBody @Valid ProductUpdateDto request,
             @AuthenticationPrincipal CustomUserPrincipal userPrincipal
     ) {
         if (userPrincipal == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 후 이용해 주세요.");
         }
 
-        request.setImages(images); // ✅ 직접 주입
+        // 이미지 없음: request.setImages(null) 도 불필요
         Member member = userPrincipal.getMember();
         productService.updateProduct(id, request, member);
         return ResponseEntity.ok("상품 수정 완료");
     }
+
 
 
     // ✅ 상품 삭제

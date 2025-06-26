@@ -40,6 +40,4 @@ public class ProductUpdateDto {
     @NotBlank
     private String openChatUrl;
 
-    @Size(min = 1, max = 5)
-    private List<MultipartFile> images;
 }
