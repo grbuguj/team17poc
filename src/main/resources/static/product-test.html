@@ -278,7 +278,7 @@
   }
 
   async function checkSession() {
-    const res = await fetch("/api/members/session-check", {
+    const res = await fetch("/api/auth/session-check", {
       credentials: 'include'
     });
     const data = await res.json();
@@ -286,7 +286,7 @@
   }
 
   async function logout() {
-    const res = await fetch("/api/members/logout", {
+    const res = await fetch("/api/auth/logout", {
       method: "POST",
       credentials: 'include'
     });
