@@ -30,10 +30,16 @@ public class MypageService {
     }
 
     public void updateName(Long memberId, String newName) {
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
         member.setName(newName);
         memberRepository.save(member);
+
+        System.out.println("== 이름 변경 시도 ==");
+        System.out.println("memberId = " + memberId);
+        System.out.println("newName = " + newName);
+        System.out.println("member.name(before) = " + member.getName());
     }
 
 

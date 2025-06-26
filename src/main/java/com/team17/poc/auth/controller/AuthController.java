@@ -164,9 +164,14 @@ public class AuthController {
 
         // provider 값으로 로컬/소셜 구분
         boolean isSocial = !"local".equalsIgnoreCase(member.getProvider());
+        String provider = Optional.ofNullable(member.getProvider()).orElse("local");
+
+        // ✅ name null-safe 처리
+        String name = Optional.ofNullable(member.getName()).orElse("이름없음");
 
         return ResponseEntity.ok(Map.of(
                 "email", member.getEmail(),
+                "name", name,
                 "isSocial", isSocial
         ));
     }

@@ -7,9 +7,10 @@
 <body>
 <h2>마이페이지 기능 테스트</h2>
 
-<!-- ✅ 현재 로그인한 이메일 표시 -->
+<!-- ✅ 현재 로그인한 이메일/이름 표시 -->
 <p>현재 이메일: <span id="currentEmail">불러오는 중...</span></p>
-<button onclick="loadCurrentEmail()">이메일 새로고침</button>
+<p>현재 이름: <span id="currentName">불러오는 중...</span></p>
+<button onclick="loadCurrentProfile()">프로필 새로고침</button>
 
 <hr>
 
@@ -18,6 +19,14 @@
 <input type="email" id="newEmail" placeholder="새 이메일 입력">
 <button onclick="updateEmail()">이메일 변경</button>
 <p id="emailMessage"></p>
+
+<hr>
+
+<!-- ✅ 이름 변경 -->
+<h3>이름 변경</h3>
+<input type="text" id="newName" placeholder="새 이름 입력">
+<button onclick="updateName()">이름 변경</button>
+<p id="nameMessage"></p>
 
 <hr>
 
@@ -30,10 +39,10 @@
 <p id="passwordMessage"></p>
 
 <script>
-    // 현재 로그인한 이메일 불러오기
-    function loadCurrentEmail() {
+    // 현재 로그인한 이메일과 이름 불러오기
+    function loadCurrentProfile() {
         fetch('/api/auth/me', {
-            credentials: 'include' // ✅ 필수!
+            credentials: 'include'
         })
             .then(res => {
                 if (!res.ok) throw new Error("로그인 필요");
@@ -41,6 +50,7 @@
             })
             .then(data => {
                 document.getElementById("currentEmail").textContent = data.email;
+                document.getElementById("currentName").textContent = data.name || "(없음)";
 
                 if (data.isSocial) {
                     document.getElementById("emailMessage").textContent = "⚠️ 소셜 로그인 사용자는 이메일을 변경할 수 없습니다.";
@@ -56,13 +66,12 @@
             })
             .catch(err => {
                 document.getElementById("currentEmail").textContent = "로그인 필요";
+                document.getElementById("currentName").textContent = "로그인 필요";
             });
     }
 
-
-
-    // 초기 이메일 자동 로드
-    loadCurrentEmail();
+    // 초기 자동 로딩
+    loadCurrentProfile();
 
     // 이메일 변경 요청
     function updateEmail() {
@@ -71,13 +80,30 @@
         fetch('/api/mypage/email', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',  // ✅ 추가
+            credentials: 'include',
             body: JSON.stringify({ newEmail })
         })
             .then(res => res.json())
             .then(data => {
                 document.getElementById("emailMessage").textContent = data.message || data.error;
-                loadCurrentEmail(); // ✅ 성공 시 이메일 새로고침
+                loadCurrentProfile();
+            });
+    }
+
+    // 이름 변경 요청
+    function updateName() {
+        const newName = document.getElementById("newName").value;
+
+        fetch('/api/mypage/name', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name: newName })
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("nameMessage").textContent = data.message || data.error;
+                loadCurrentProfile();  // ✅ 성공 시 이름 다시 로드
             });
     }
 
@@ -90,7 +116,7 @@
         fetch('/api/mypage/password', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',  // ✅ 추가
+            credentials: 'include',
             body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
         })
             .then(res => res.json())
