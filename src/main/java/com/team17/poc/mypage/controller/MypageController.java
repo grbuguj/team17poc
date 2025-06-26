@@ -1,6 +1,7 @@
 package com.team17.poc.mypage.controller;
 
 import com.team17.poc.mypage.dto.ChangePasswordRequest;
+import com.team17.poc.mypage.dto.UpdateNameRequest;
 import com.team17.poc.mypage.dto.UpdateProfileRequest;
 import com.team17.poc.mypage.service.MypageService;
 import jakarta.servlet.http.HttpSession;
@@ -30,6 +31,22 @@ public class MypageController {
         myPageService.updateEmail(memberId, request.getNewEmail());
         return ResponseEntity.ok(Map.of("message", "이메일이 변경되었습니다."));
     }
+
+    @PutMapping("/name")
+    public ResponseEntity<?> updateName(HttpSession session,
+                                        @RequestBody UpdateNameRequest request) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "로그인이 필요합니다."));
+        }
+
+        myPageService.updateName(memberId, request.getNewName());
+        return ResponseEntity.ok(Map.of("message", "이름이 변경되었습니다."));
+    }
+
+
+
 
     @PutMapping("/password")
     public ResponseEntity<?> changePassword(HttpSession session,

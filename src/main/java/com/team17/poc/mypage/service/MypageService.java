@@ -3,6 +3,7 @@ package com.team17.poc.mypage.service;
 import com.team17.poc.auth.entity.Member;
 import com.team17.poc.auth.repository.MemberRepository;
 import com.team17.poc.mypage.dto.ChangePasswordRequest;
+import com.team17.poc.mypage.dto.UpdateProfileRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
@@ -28,6 +29,14 @@ public class MypageService {
         member.setEmail(newEmail);
     }
 
+    public void updateName(Long memberId, String newName) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+        member.setName(newName);
+        memberRepository.save(member);
+    }
+
+
     public void changePassword(Long memberId, ChangePasswordRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
@@ -46,4 +55,5 @@ public class MypageService {
 
         member.setPassword(passwordEncoder.encode(request.getNewPassword()));
     }
+
 }

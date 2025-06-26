@@ -6,4 +6,6 @@ public class UpdateProfileRequest {
     public String getNewEmail() {
         return newEmail;
     }
+
+
 }
