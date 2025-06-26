@@ -23,4 +23,6 @@ public interface ProductService {
     void updateProduct(Long id, @Valid ProductUpdateDto request, Member member);
 
     void deleteProduct(Long id, Member member);
+
+    List<ProductListResponseDto> getMySellList(Member member);
 }

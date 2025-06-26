@@ -73,6 +73,7 @@
   </select>
   <button onclick="fetchProducts()">조회</button>
   <button onclick="fetchFavorites()">⭐ 즐겨찾기만 보기</button>
+  <button onclick="fetchSellList()">📦 내가 등록한 상품</button>
   <div id="productList"></div>
 </div>
 
@@ -124,6 +125,7 @@
       formData.append("images", form.images.files[i]);
     }
     const response = await fetch("/api/products", { method: "POST", body: formData });
+
     if (response.ok) {
       alert("등록 완료");
       form.reset();
@@ -143,6 +145,18 @@
 
   async function fetchFavorites() {
     const res = await fetch("/api/products/favorites");
+
+    if (res.status === 401) {
+      alert("로그인 후 이용해 주세요.");
+      return;
+    }
+
+    if (!res.ok) {
+      const errText = await res.text();
+      alert("요청 실패: " + errText);
+      return;
+    }
+
     const data = await res.json();
     renderProductList(data);
   }
@@ -201,7 +215,22 @@
   }
 
   async function toggleFavorite(productId, button) {
-    const res = await fetch(`/api/products/${productId}/favorite`, { method: 'POST' });
+    const res = await fetch(`/api/products/${productId}/favorite`, {
+      method: 'POST',
+      credentials: 'include', // ✅ 세션 쿠키 포함
+    });
+
+    if (res.status === 401) {
+      alert("로그인 후 이용해 주세요.");
+      return;
+    }
+
+    if (!res.ok) {
+      const errText = await res.text();
+      alert("요청 실패: " + errText);
+      return;
+    }
+
     const result = await res.json();
     const isFavorited = result === true;
     if (button) {
@@ -210,31 +239,23 @@
     alert(isFavorited ? "즐겨찾기 등록됨" : "즐겨찾기 해제됨");
   }
 
-  document.getElementById('editForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!selectedProductId) return alert("먼저 상품을 선택하세요.");
-    const form = e.target;
-    const formData = new FormData();
-    for (const input of form.elements) {
-      if (input.name && input.value) formData.append(input.name, input.value);
-    }
-    const res = await fetch(`/api/products/${selectedProductId}`, {
-      method: "PUT",
-      body: formData
-    });
-    if (res.ok) {
-      alert("상품 수정 완료");
-      fetchProductDetail(selectedProductId);
-      fetchProducts();
-    } else {
-      alert("수정 실패");
-    }
-  });
 
   async function deleteProduct() {
     if (!selectedProductId) return alert("먼저 상품을 선택하세요.");
     if (!confirm("정말 삭제하시겠습니까?")) return;
     const res = await fetch(`/api/products/${selectedProductId}`, { method: 'DELETE' });
+
+    if (res.status === 401) {
+      alert("로그인 후 이용해 주세요.");
+      return;
+    }
+
+    if (!res.ok) {
+      const errText = await res.text();
+      alert("요청 실패: " + errText);
+      return;
+    }
+
     if (res.ok) {
       alert("삭제 완료");
       document.getElementById('productDetail').innerHTML = '';
@@ -243,6 +264,24 @@
     } else {
       alert("삭제 실패");
     }
+  }
+
+  async function fetchSellList() {
+    const res = await fetch("/api/products/sell-list");
+
+    if (res.status === 401) {
+      alert("로그인 후 이용해 주세요.");
+      return;
+    }
+
+    if (!res.ok) {
+      const errText = await res.text();
+      alert("요청 실패: " + errText);
+      return;
+    }
+
+    const data = await res.json();
+    renderProductList(data);
   }
 
   window.onload = fetchProducts;

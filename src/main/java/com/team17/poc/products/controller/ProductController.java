@@ -56,24 +56,32 @@ public class ProductController {
 
 
 
-    // ✅  상품 수정
+    // ✅ 상품 수정
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> updateProduct(
             @PathVariable Long id,
             @ModelAttribute @Valid ProductUpdateDto request,
             @AuthenticationPrincipal CustomUserPrincipal userPrincipal
     ) {
+        if (userPrincipal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 후 이용해 주세요.");
+        }
+
         Member member = userPrincipal.getMember();
         productService.updateProduct(id, request, member);
         return ResponseEntity.ok("상품 수정 완료");
     }
 
-    // ✅  상품 삭제
+    // ✅ 상품 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserPrincipal userPrincipal
     ) {
+        if (userPrincipal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 후 이용해 주세요.");
+        }
+
         Member member = userPrincipal.getMember();
         productService.deleteProduct(id, member);
         return ResponseEntity.ok("상품 삭제 완료");
@@ -103,22 +111,42 @@ public class ProductController {
     }
 
 
-    // ✅  즐겨찾기 토글
+    // ✅ 즐겨찾기 토글
     @PostMapping("/{id}/favorite")
     public ResponseEntity<Boolean> toggleFavorite(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserPrincipal userPrincipal) {
+        if (userPrincipal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 후 이용해 주세요.");
+        }
         Member member = userPrincipal.getMember();
         boolean result = productService.toggleFavorite(id, member);
         return ResponseEntity.ok(result);
     }
 
-    // ✅ 5. 즐겨찾기 목록
+    // ✅ 즐겨찾기 목록
     @GetMapping("/favorites")
     public ResponseEntity<List<ProductListResponseDto>> getFavorites(
             @AuthenticationPrincipal CustomUserPrincipal userPrincipal) {
+        if (userPrincipal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 후 이용해 주세요.");
+        }
         Member member = userPrincipal.getMember();
         List<ProductListResponseDto> favorites = productService.getFavoriteProducts(member);
         return ResponseEntity.ok(favorites);
     }
+
+    // ✅ 내 판매 목록
+    @GetMapping("/sell-list")
+    public ResponseEntity<List<ProductListResponseDto>> getMySellList(
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal) {
+        if (userPrincipal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 후 이용해 주세요.");
+        }
+        Member member = userPrincipal.getMember();
+        List<ProductListResponseDto> sellList = productService.getMySellList(member);
+        return ResponseEntity.ok(sellList);
+    }
+
+
 }
