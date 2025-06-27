@@ -36,6 +36,23 @@ public class BoxService {
         return locationRepository.findByMemberId(memberId);
     }
 
+    public List<LocationWithCountDto> getLocationsWithItemCount(Long memberId) {
+        List<Location> locations = locationRepository.findByMemberId(memberId);
+
+        return locations.stream().map(location -> {
+            int itemCount = itemRepository.countByLocationId(location.getId());
+            return new LocationWithCountDto(
+                    location.getId(),
+                    location.getName(),
+                    location.getDescription(),
+                    location.getImagePath(),
+                    itemCount
+            );
+        }).collect(Collectors.toList());
+    }
+
+
+
     // 장소 추가
     /*
     public Location addLocation(Long memberId, LocationRequestDto dto) {

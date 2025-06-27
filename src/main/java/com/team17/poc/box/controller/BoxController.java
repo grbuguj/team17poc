@@ -54,6 +54,7 @@ public class BoxController {
 
     // 장소 목록 조회 (ex. memberId가 3인 사용자의 모든 장소 조회)
 
+    /*
     @GetMapping("/locations")
     public List<Location> getLocations(HttpSession session) {
         Long memberId = (Long) session.getAttribute("memberId");
@@ -63,6 +64,20 @@ public class BoxController {
         }
         return boxService.getLocations(memberId);
     }
+     */
+    @GetMapping("/locations-count")
+    public List<LocationWithCountDto> getLocations(HttpSession session) {
+        Long memberId = (Long) session.getAttribute("memberId");
+
+        if (memberId != null) {
+            return boxService.getLocationsWithItemCount(memberId);
+        }
+
+        return List.of(); // 또는 boxService.getPublicLocationsWithItemCount();
+    }
+
+
+
 
 
 
