@@ -63,17 +63,7 @@ public class BoxController {
     }
 
     // 장소 등록
-    /*
-    @PostMapping("/locations")
-    public Location addLocation(HttpSession session, @RequestBody LocationRequestDto dto) {
-        Long memberId = (Long) session.getAttribute("memberId");
-        if (memberId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
-        }
-
-        return boxService.addLocation(memberId, dto);
-    }
-     */
+/*
     @PostMapping(value = "/locations", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Location addLocation(
             HttpSession session,
@@ -86,6 +76,22 @@ public class BoxController {
 
         return boxService.addLocation(memberId, dto);
     }
+ */
+// 장소 등록 수정중 (이미지 추가 관련)
+    @PostMapping(value = "/locations", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Location addLocation(
+            HttpSession session,
+            @ModelAttribute LocationRequestDto dto
+    ) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
+        return boxService.addLocation(memberId, dto);
+    }
+
+
 
 
     // 장소 수정
@@ -154,7 +160,7 @@ public class BoxController {
     // 바코드 촬영
     @PostMapping("/items/shot-barcode")
     public ResponseEntity<Map<String, String>> readBarcode(
-            @RequestParam("file") MultipartFile file,
+            @RequestParam("image") MultipartFile image,
             HttpSession session) {  // ✅ 세션 파라미터 추가
 
         System.out.println("✅ 컨트롤러 진입 성공");
@@ -166,7 +172,7 @@ public class BoxController {
         }
 
         try {
-            String barcode = barcodeDecoderService.decodeBarcode(file);
+            String barcode = barcodeDecoderService.decodeBarcode(image);
             Optional<BarcodeInfo> result = barcodeFindService.findByBarcode(barcode);
 
             if (result.isEmpty()) {
@@ -210,7 +216,7 @@ public class BoxController {
     // 유통기한 촬영
     @PostMapping("/items/shot-expire")
     public ResponseEntity<ExpireOcrResultDto> handleExpireScan(
-            @RequestParam("imageFile") MultipartFile imageFile,
+            @RequestParam("image") MultipartFile image,
             /*@RequestParam("sessionId")*/
             HttpSession session) throws IOException {
 
@@ -219,9 +225,9 @@ public class BoxController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String ext = imageFile.getOriginalFilename().replaceAll("^.*\\.(?=\\w+$)", ".");
+        String ext = image.getOriginalFilename().replaceAll("^.*\\.(?=\\w+$)", ".");
         File convFile = File.createTempFile("upload_", ext);
-        imageFile.transferTo(convFile);
+        image.transferTo(convFile);
         convFile.deleteOnExit();
 
 

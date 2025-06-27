@@ -19,6 +19,8 @@ public class Location {
 
     private Long memberId; // 이 장소를 등록한 사용자 ID
 
+    private String description;
+
     // entity/Location.java
     @Column(name = "image_path")
     private String imagePath;

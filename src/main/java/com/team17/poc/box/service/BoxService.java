@@ -10,12 +10,15 @@ import com.team17.poc.box.repository.LocationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -29,10 +32,12 @@ public class BoxService {
 
     // 장소 전체 조회
     public List<Location> getLocations(Long memberId) {
+
         return locationRepository.findByMemberId(memberId);
     }
 
     // 장소 추가
+    /*
     public Location addLocation(Long memberId, LocationRequestDto dto) {
         String imagePath = null;
 
@@ -57,6 +62,40 @@ public class BoxService {
                 .build();
         return locationRepository.save(location);
     }
+
+     */
+
+    // 장소 등록 - 이미지 추가 관련 새로운 추가 사항
+    @Transactional
+    public Location addLocation(Long memberId, LocationRequestDto dto) {
+        MultipartFile image = dto.getImage();
+        String imagePath = null;
+
+        if (image != null && !image.isEmpty()) {
+            String filename = UUID.randomUUID() + "_" + image.getOriginalFilename();
+            String baseDir = System.getProperty("user.dir"); // 프로젝트 루트 경로
+            String uploadDir = baseDir + "/uploads/location/";
+
+            try {
+                Files.createDirectories(Paths.get(uploadDir)); // 경로 없으면 자동 생성
+                image.transferTo(new File(uploadDir + filename)); // 이미지 저장
+                imagePath = "/uploads/location/" + filename; // DB에 저장될 경로
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 저장 실패", e);
+            }
+        }
+
+        Location location = Location.builder()
+                .memberId(memberId)
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .imagePath(imagePath)
+                .build();
+
+        return locationRepository.save(location);
+    }
+
+
 
     // 장소 수정
     public Location updateLocation(Long locationId, LocationRequestDto dto) {
