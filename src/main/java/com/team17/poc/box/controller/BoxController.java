@@ -9,9 +9,11 @@ import com.team17.poc.box.service.BarcodeFindService;
 import com.team17.poc.box.service.BoxService;
 import com.team17.poc.ocr.service.OcrService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -62,8 +64,26 @@ public class BoxController {
     }
 
     // 장소 등록
-    @PostMapping("/locations")
-    public Location addLocation(HttpSession session, @RequestBody LocationRequestDto dto) {
+/*
+    @PostMapping(value = "/locations", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Location addLocation(
+            HttpSession session,
+            @RequestPart("dto") LocationRequestDto dto
+    ) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
+        return boxService.addLocation(memberId, dto);
+    }
+ */
+// 장소 등록 새롭게 추가 (이미지 추가 관련)
+    @PostMapping(value = "/locations", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Location addLocation(
+            HttpSession session,
+            @ModelAttribute LocationRequestDto dto
+    ) {
         Long memberId = (Long) session.getAttribute("memberId");
         if (memberId == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
@@ -72,19 +92,40 @@ public class BoxController {
         return boxService.addLocation(memberId, dto);
     }
 
-    // 장소 수정
+
+
+
+    // 장소 수정 (기존. 이미지 넣기 전)
+    /*
     @PatchMapping("/locations/{locationId}")
     public Location updateLocation(@PathVariable("locationId") Long locationId, @RequestBody LocationRequestDto dto) {
         return boxService.updateLocation(locationId, dto);
     }
+     */
+
+    // 장소 수정 (new. 이미지 넣고)
+    @PatchMapping(value = "/locations/{locationId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Location updateLocation(
+            @PathVariable("locationId") Long locationId,
+            @ModelAttribute LocationRequestDto dto
+    ) {
+        return boxService.updateLocation(locationId, dto);
+    }
+
 
 
     private final ItemRepository itemRepository;
-    // 장소 삭제
+
+    // 장소 삭제 (수정중.)
     @DeleteMapping("/locations/{locationId}")
-    public void deleteLocation(@PathVariable("locationId") Long locationId) {
-        itemRepository.deleteByLocationId(locationId);
+    public ResponseEntity<Map<String, String>> deleteLocation(@PathVariable("locationId") Long locationId) {
+        //itemRepository.deleteByLocationId(locationId);
         boxService.deleteLocation(locationId);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "장소가 성공적으로 삭제되었습니다.");
+
+        return ResponseEntity.ok(response);
     }
 
 
@@ -138,7 +179,7 @@ public class BoxController {
     // 바코드 촬영
     @PostMapping("/items/shot-barcode")
     public ResponseEntity<Map<String, String>> readBarcode(
-            @RequestParam("file") MultipartFile file,
+            @RequestParam("image") MultipartFile image,
             HttpSession session) {  // ✅ 세션 파라미터 추가
 
         System.out.println("✅ 컨트롤러 진입 성공");
@@ -150,7 +191,7 @@ public class BoxController {
         }
 
         try {
-            String barcode = barcodeDecoderService.decodeBarcode(file);
+            String barcode = barcodeDecoderService.decodeBarcode(image);
             Optional<BarcodeInfo> result = barcodeFindService.findByBarcode(barcode);
 
             if (result.isEmpty()) {
@@ -194,7 +235,7 @@ public class BoxController {
     // 유통기한 촬영
     @PostMapping("/items/shot-expire")
     public ResponseEntity<ExpireOcrResultDto> handleExpireScan(
-            @RequestParam("imageFile") MultipartFile imageFile,
+            @RequestParam("image") MultipartFile image,
             /*@RequestParam("sessionId")*/
             HttpSession session) throws IOException {
 
@@ -203,9 +244,9 @@ public class BoxController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String ext = imageFile.getOriginalFilename().replaceAll("^.*\\.(?=\\w+$)", ".");
+        String ext = image.getOriginalFilename().replaceAll("^.*\\.(?=\\w+$)", ".");
         File convFile = File.createTempFile("upload_", ext);
-        imageFile.transferTo(convFile);
+        image.transferTo(convFile);
         convFile.deleteOnExit();
 
 

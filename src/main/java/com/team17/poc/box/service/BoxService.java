@@ -10,12 +10,15 @@ import com.team17.poc.box.repository.LocationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -29,25 +32,112 @@ public class BoxService {
 
     // 장소 전체 조회
     public List<Location> getLocations(Long memberId) {
+
         return locationRepository.findByMemberId(memberId);
     }
 
     // 장소 추가
+    /*
     public Location addLocation(Long memberId, LocationRequestDto dto) {
+        String imagePath = null;
+
+        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
+            try {
+                // 로컬에 저장하는 예시 (S3라면 따로 구현)
+                String filename = UUID.randomUUID() + "_" + dto.getImage().getOriginalFilename();
+                Path path = Paths.get("uploads/" + filename); // 상대 경로 저장
+                Files.createDirectories(path.getParent()); // 디렉토리 없으면 생성
+                dto.getImage().transferTo(path.toFile());
+                imagePath = path.toString(); // 또는 "/uploads/" + filename
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 저장 실패", e);
+            }
+        }
+
+
         Location location = Location.builder()
                 .name(dto.getName())
                 .memberId(memberId)
+                .imagePath(imagePath)
                 .build();
         return locationRepository.save(location);
     }
 
-    // 장소 수정
+     */
+
+    // 장소 등록 - 이미지 추가 관련 새로운 추가 사항
+    @Transactional
+    public Location addLocation(Long memberId, LocationRequestDto dto) {
+        MultipartFile image = dto.getImage();
+        String imagePath = null;
+
+        if (image != null && !image.isEmpty()) {
+            String filename = UUID.randomUUID() + "_" + image.getOriginalFilename();
+            String baseDir = System.getProperty("user.dir"); // 프로젝트 루트 경로
+            String uploadDir = baseDir + "/uploads/location/";
+
+            try {
+                Files.createDirectories(Paths.get(uploadDir)); // 경로 없으면 자동 생성
+                image.transferTo(new File(uploadDir + filename)); // 이미지 저장
+                imagePath = "/uploads/location/" + filename; // DB에 저장될 경로
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 저장 실패", e);
+            }
+        }
+
+        Location location = Location.builder()
+                .memberId(memberId)
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .imagePath(imagePath)
+                .build();
+
+        return locationRepository.save(location);
+    }
+
+
+
+    // 장소 수정 (이미지 넣기 전)
+    /*
     public Location updateLocation(Long locationId, LocationRequestDto dto) {
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 장소가 존재하지 않습니다"));
         location.setName(dto.getName());
         return locationRepository.save(location);
     }
+     */
+
+    // 장소 수정 (new)
+    public Location updateLocation(Long locationId, LocationRequestDto dto) {
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 장소가 존재하지 않습니다."));
+
+        if (dto.getName() != null) {
+            location.setName(dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            location.setDescription(dto.getDescription());
+        }
+
+        MultipartFile image = dto.getImage();
+        if (image != null && !image.isEmpty()) {
+            String filename = UUID.randomUUID() + "_" + image.getOriginalFilename();
+            String baseDir = System.getProperty("user.dir");
+            String uploadDir = baseDir + "/uploads/location/";
+
+            try {
+                Files.createDirectories(Paths.get(uploadDir));
+                image.transferTo(new File(uploadDir + filename));
+                String imagePath = "/uploads/location/" + filename;
+                location.setImagePath(imagePath);
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 저장 실패", e);
+            }
+        }
+
+        return locationRepository.save(location);
+    }
+
 
     // 장소 삭제
     public void deleteLocation(Long locationId) {
