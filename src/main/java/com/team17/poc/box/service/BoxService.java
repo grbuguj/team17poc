@@ -8,9 +8,11 @@ import com.team17.poc.box.entity.Location;
 import com.team17.poc.box.repository.ItemRepository;
 import com.team17.poc.box.repository.LocationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
@@ -188,6 +190,11 @@ public class BoxService {
 
     @Transactional
     public void addItem(Long memberId, ItemRequestDto dto) {
+
+        if (dto.getLocationId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "locationId가 없습니다.");
+        }
+
         Location location = locationRepository.findById(dto.getLocationId())
                 .filter(loc -> loc.getMemberId().equals(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("해당 장소가 없습니다."));
