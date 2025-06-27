@@ -53,15 +53,18 @@ public class BoxController {
 
 
     // 장소 목록 조회 (ex. memberId가 3인 사용자의 모든 장소 조회)
+
     @GetMapping("/locations")
     public List<Location> getLocations(HttpSession session) {
         Long memberId = (Long) session.getAttribute("memberId");
         if (memberId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+            // throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+            return boxService.getLocations(memberId);
         }
-
         return boxService.getLocations(memberId);
     }
+
+
 
     // 장소 등록
 /*
