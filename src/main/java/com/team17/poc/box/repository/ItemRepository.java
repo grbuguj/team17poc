@@ -17,6 +17,10 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByMemberId(Long memberId);
     List<Item> findByLocationId(Long locationId);
 
+    // 장소 조회 시, 제품 개수 카운트 위한 코드
+    int countByLocationId(Long locationId);
+
+
     // 제품 단일 조회 위한 code
     Optional<Item> findByIdAndMember_Id(Long id, Long memberId);
 
