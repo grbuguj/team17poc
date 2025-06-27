@@ -65,7 +65,7 @@ public class BoxController {
         return boxService.getLocations(memberId);
     }
      */
-    @GetMapping("/locations-count")
+    @GetMapping("/locations")
     public List<LocationWithCountDto> getLocations(HttpSession session) {
         Long memberId = (Long) session.getAttribute("memberId");
 
