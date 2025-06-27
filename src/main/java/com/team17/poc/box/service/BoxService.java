@@ -97,13 +97,47 @@ public class BoxService {
 
 
 
-    // 장소 수정
+    // 장소 수정 (이미지 넣기 전)
+    /*
     public Location updateLocation(Long locationId, LocationRequestDto dto) {
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 장소가 존재하지 않습니다"));
         location.setName(dto.getName());
         return locationRepository.save(location);
     }
+     */
+
+    // 장소 수정 (new)
+    public Location updateLocation(Long locationId, LocationRequestDto dto) {
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 장소가 존재하지 않습니다."));
+
+        if (dto.getName() != null) {
+            location.setName(dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            location.setDescription(dto.getDescription());
+        }
+
+        MultipartFile image = dto.getImage();
+        if (image != null && !image.isEmpty()) {
+            String filename = UUID.randomUUID() + "_" + image.getOriginalFilename();
+            String baseDir = System.getProperty("user.dir");
+            String uploadDir = baseDir + "/uploads/location/";
+
+            try {
+                Files.createDirectories(Paths.get(uploadDir));
+                image.transferTo(new File(uploadDir + filename));
+                String imagePath = "/uploads/location/" + filename;
+                location.setImagePath(imagePath);
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 저장 실패", e);
+            }
+        }
+
+        return locationRepository.save(location);
+    }
+
 
     // 장소 삭제
     public void deleteLocation(Long locationId) {
