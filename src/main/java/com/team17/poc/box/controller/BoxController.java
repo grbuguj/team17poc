@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -62,6 +63,7 @@ public class BoxController {
     }
 
     // 장소 등록
+    /*
     @PostMapping("/locations")
     public Location addLocation(HttpSession session, @RequestBody LocationRequestDto dto) {
         Long memberId = (Long) session.getAttribute("memberId");
@@ -71,6 +73,20 @@ public class BoxController {
 
         return boxService.addLocation(memberId, dto);
     }
+     */
+    @PostMapping(value = "/locations", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Location addLocation(
+            HttpSession session,
+            @RequestPart("dto") LocationRequestDto dto
+    ) {
+        Long memberId = (Long) session.getAttribute("memberId");
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인 세션 없음");
+        }
+
+        return boxService.addLocation(memberId, dto);
+    }
+
 
     // 장소 수정
     @PatchMapping("/locations/{locationId}")

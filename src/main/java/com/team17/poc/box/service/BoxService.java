@@ -34,9 +34,26 @@ public class BoxService {
 
     // 장소 추가
     public Location addLocation(Long memberId, LocationRequestDto dto) {
+        String imagePath = null;
+
+        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
+            try {
+                // 로컬에 저장하는 예시 (S3라면 따로 구현)
+                String filename = UUID.randomUUID() + "_" + dto.getImage().getOriginalFilename();
+                Path path = Paths.get("uploads/" + filename); // 상대 경로 저장
+                Files.createDirectories(path.getParent()); // 디렉토리 없으면 생성
+                dto.getImage().transferTo(path.toFile());
+                imagePath = path.toString(); // 또는 "/uploads/" + filename
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 저장 실패", e);
+            }
+        }
+
+
         Location location = Location.builder()
                 .name(dto.getName())
                 .memberId(memberId)
+                .imagePath(imagePath)
                 .build();
         return locationRepository.save(location);
     }
